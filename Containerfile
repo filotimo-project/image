@@ -37,40 +37,35 @@ ARG SOURCE_SUFFIX="-main"
 
 ## SOURCE_TAG arg must be a version built for the specific image: eg, 39, 40, gts, latest
 ARG SOURCE_TAG="40"
-
+ARG FEDORA_MAJOR_VERSION="${FEDORA_MAJOR_VERSION:-40}"
 
 ### 2. SOURCE IMAGE
 ## this is a standard Containerfile FROM using the build ARGs above to select the right upstream image
-FROM ghcr.io/ublue-os/${SOURCE_IMAGE}${SOURCE_SUFFIX}:${SOURCE_TAG}
 FROM ghcr.io/ublue-os/fsync-kernel:${FEDORA_MAJOR_VERSION} AS fsync
+FROM ghcr.io/ublue-os/${SOURCE_IMAGE}${SOURCE_SUFFIX}:${SOURCE_TAG}
 
 # fsync kernel
 RUN --mount=type=cache,dst=/var/cache/rpm-ostree \
     --mount=type=bind,from=fsync,src=/tmp/rpms,dst=/tmp/fsync-rpms \
     rpm-ostree cliwrap install-to-root / && \
-    if [[ "${KERNEL_FLAVOR}" =~ "fsync" ]]; then \
-        echo "Will install ${KERNEL_FLAVOR} kernel" && \
-        rpm-ostree override replace \
-        --experimental \
-            /tmp/fsync-rpms/kernel-[0-9]*.rpm \
-            /tmp/fsync-rpms/kernel-core-*.rpm \
-            /tmp/fsync-rpms/kernel-modules-*.rpm \
-            /tmp/fsync-rpms/kernel-uki-virt-*.rpm \
-    ; else \
-        echo "will use kernel from ${KERNEL_FLAVOR} images" \
-    ; fi && \
-    rpm-ostree install \
-        scx-scheds && \
+    rpm-ostree override replace --experimental \
+        /tmp/fsync-rpms/kernel-[0-9]*.rpm \
+        /tmp/fsync-rpms/kernel-core-*.rpm \
+        /tmp/fsync-rpms/kernel-modules-*.rpm \
+        /tmp/fsync-rpms/kernel-uki-virt-*.rpm \
     /usr/libexec/containerbuild/cleanup.sh && \
     ostree container commit
 
 
 # Install important repos
 RUN --mount=type=cache,dst=/var/cache/rpm-ostree \
-    curl -Lo /etc/yum.repos.d/filotimo.repo https://download.opensuse.org/repositories/home:/tduck:/filotimolinux/Fedora_${FEDORA_MAJOR_VERSION}/home:tduck:filotimolinux.repo && \
-    curl -Lo /etc/yum.repos.d/klassy.repo https://mirrorcache-au.opensuse.org/repositories/home:/paul4us/Fedora_${FEDORA_MAJOR_VERSION}/home:paul4us.repo && \
+    curl -Lo /etc/yum.repos.d/filotimo.repo https://download.opensuse.org/repositories/home:/tduck:/filotimolinux/Fedora_40/home:tduck:filotimolinux.repo && \
+    curl -Lo /etc/yum.repos.d/klassy.repo https://download.opensuse.org/repositories/home:/paul4us/Fedora_40/home:paul4us.repo && \
     curl -Lo /etc/yum.repos.d/terra.repo https://terra.fyralabs.com/terra.repo && \
-    rpm-ostree install terra-release rpmfusion-free-tainted rpmfusion-nonfree-tainted && \
+    /usr/libexec/containerbuild/cleanup.sh && \
+    ostree container commit
+RUN --mount=type=cache,dst=/var/cache/rpm-ostree \
+    rpm-ostree install terra-release rpmfusion-free-release-tainted rpmfusion-nonfree-release-tainted && \
     /usr/libexec/containerbuild/cleanup.sh && \
     ostree container commit
 

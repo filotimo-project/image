@@ -27,7 +27,6 @@ filotimo-atychia
 # Remove misc. packages
 rpm-ostree override remove \
 power-profiles-daemon \
-firefox \
 mediawriter \
 krusader \
 konversation \
@@ -74,8 +73,7 @@ foomatic-db \
 gutenprint \
 hplip
 
-FLATPAK_FLATHUB=( org.mozilla.Firefox
-org.mozilla.Thunderbird
+FLATPAK_FLATHUB=( org.mozilla.Thunderbird
 org.kde.isoimagewriter
 org.kde.kclock
 org.kde.kweather

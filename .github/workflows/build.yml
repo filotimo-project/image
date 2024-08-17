@@ -155,6 +155,7 @@ jobs:
           TAGS: ${{ steps.push.outputs.digest }}
           COSIGN_EXPERIMENTAL: false
           COSIGN_PRIVATE_KEY: ${{ secrets.SIGNING_SECRET }}
+
       - name: Build Container Installer
         uses: JasonN3/build-container-installer@v1.2.2
         id: build

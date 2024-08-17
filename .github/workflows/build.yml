@@ -169,6 +169,7 @@ jobs:
             iso_name: ${{ env.IMAGE_NAME }}-${{ env.IMAGE_TAG }}-${{ env.VERSION }}.iso
             flatpak_remote_refs_dir: flatpaks/
             enrollment_password: filotimo
+            web_ui: true
 
         # This example is for uploading your ISO as a GitHub artifact. You can do something similar using any cloud storage, so long as you copy the output
       - name: Upload ISO as artifact

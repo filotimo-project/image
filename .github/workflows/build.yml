@@ -160,7 +160,7 @@ jobs:
         uses: JasonN3/build-container-installer@v1.2.2
         id: build
         with:
-            arch: ${{ env.ARCH }}
+            arch: ${{ env.IMAGE_ARCH }}
             image_name: ${{ env.IMAGE_NAME }}
             image_repo: ${{ env.IMAGE_REGISTRY }}
             image_tag: ${{ env.IMAGE_TAG }}

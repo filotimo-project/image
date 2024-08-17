@@ -14,9 +14,13 @@ on:
   workflow_dispatch:
 
 env:
-  MY_IMAGE_NAME: "${{ github.event.repository.name }}"  # the name of the image produced by this build, matches repo names
-  MY_IMAGE_DESC: "Filotimo Linux OCI Image"
+  IMAGE_NAME: "${{ github.event.repository.name }}"  # the name of the image produced by this build, matches repo names
+  IMAGE_DESC: "Filotimo Linux OCI Image"
+  IMAGE_TAG: "prerelease"
+  IMAGE_ARCH: "x86_64"
+  MAJOR_VERSION: "40"
   IMAGE_REGISTRY: "ghcr.io/${{ github.repository_owner }}"  # do not edit
+
 
 jobs:
   build_push:
@@ -82,12 +86,12 @@ jobs:
         id: meta
         with:
           images: |
-            ${{ env.MY_IMAGE_NAME }}
+            ${{ env.IMAGE_NAME }}
 
           labels: |
             io.artifacthub.package.readme-url=https://raw.githubusercontent.com/${{ github.repository }}/main/README.md
-            org.opencontainers.image.description=${{ env.MY_IMAGE_DESC }}
-            org.opencontainers.image.title=${{ env.MY_IMAGE_NAME }}
+            org.opencontainers.image.description=${{ env.IMAGE_DESC }}
+            org.opencontainers.image.title=${{ env.IMAGE_NAME }}
 
       # Build image using Buildah action
       - name: Build Image
@@ -98,7 +102,7 @@ jobs:
             ./Containerfile
           # Postfix image name with -custom to make it a little more descriptive
           # Syntax: https://docs.github.com/en/actions/learn-github-actions/expressions#format
-          image: ${{ env.MY_IMAGE_NAME }}
+          image: ${{ env.IMAGE_NAME }}
           tags: |
             ${{ steps.generate-tags.outputs.alias_tags }}
           labels: ${{ steps.meta.outputs.labels }}
@@ -151,3 +155,30 @@ jobs:
           TAGS: ${{ steps.push.outputs.digest }}
           COSIGN_EXPERIMENTAL: false
           COSIGN_PRIVATE_KEY: ${{ secrets.SIGNING_SECRET }}
+      - name: Build Container Installer
+        uses: JasonN3/build-container-installer@v1.2.2
+        id: build
+        with:
+            arch: ${{ env.ARCH }}
+            image_name: ${{ env.IMAGE_NAME }}
+            image_repo: ${{ env.IMAGE_REGISTRY }}
+            image_tag: ${{ env.IMAGE_TAG }}
+            version: ${{ env.MAJOR_VERSION }}
+            variant: "Kinoite"
+            iso_name: ${{ env.IMAGE_NAME }}-${{ env.IMAGE_TAG }}-${{ env.VERSION }}.iso
+            flatpak_remote_refs_dir: flatpaks/
+            enrollment_password: filotimo
+
+        # This example is for uploading your ISO as a Github artifact. You can do something similar using any cloud storage, so long as you copy the output
+        - name: Upload ISO as artifact
+        id: upload
+        uses: actions/upload-artifact@v4
+        with:
+            name: ${{ steps.build.outputs.iso_name }}
+            path: |
+            ${{ steps.build.outputs.iso_path }}
+            ${{ steps.build.outputs.iso_path }}-CHECKSUM
+            if-no-files-found: error
+            retention-days: 0
+            compression-level: 0
+

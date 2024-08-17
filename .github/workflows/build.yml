@@ -16,7 +16,7 @@ on:
 env:
   IMAGE_NAME: "${{ github.event.repository.name }}"  # the name of the image produced by this build, matches repo names
   IMAGE_DESC: "Filotimo Linux OCI Image"
-  IMAGE_TAG: "prerelease"
+  IMAGE_TAG: "latest"
   IMAGE_ARCH: "x86_64"
   MAJOR_VERSION: "40"
   IMAGE_REGISTRY: "ghcr.io/${{ github.repository_owner }}"  # do not edit

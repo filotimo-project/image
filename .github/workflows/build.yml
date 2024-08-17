@@ -140,7 +140,7 @@ jobs:
 
       # This section is optional and only needs to be enabled in you plan on distributing
       # your project to others to consume. You will need to create a public and private key
-      # using Cosign and save the private key as a repository secret in Github for this workflow
+      # using Cosign and save the private key as a repository secret in GitHub for this workflow
       # to consume. For more details, review the image signing section of the README.
 
       # Sign container
@@ -170,16 +170,16 @@ jobs:
             flatpak_remote_refs_dir: flatpaks/
             enrollment_password: filotimo
 
-        # This example is for uploading your ISO as a Github artifact. You can do something similar using any cloud storage, so long as you copy the output
-        - name: Upload ISO as artifact
+        # This example is for uploading your ISO as a GitHub artifact. You can do something similar using any cloud storage, so long as you copy the output
+      - name: Upload ISO as artifact
         id: upload
         uses: actions/upload-artifact@v4
         with:
-            name: ${{ steps.build.outputs.iso_name }}
-            path: |
-            ${{ steps.build.outputs.iso_path }}
-            ${{ steps.build.outputs.iso_path }}-CHECKSUM
-            if-no-files-found: error
-            retention-days: 0
-            compression-level: 0
+          name: ${{ steps.build.outputs.iso_name }}
+          path: |
+              ${{ steps.build.outputs.iso_path }}
+              ${{ steps.build.outputs.iso_path }}-CHECKSUM
+          if-no-files-found: error
+          retention-days: 0
+          compression-level: 0
 

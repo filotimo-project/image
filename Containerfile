@@ -48,12 +48,12 @@ FROM ghcr.io/ublue-os/${SOURCE_IMAGE}${SOURCE_SUFFIX}:${SOURCE_TAG}
 RUN --mount=type=cache,dst=/var/cache/rpm-ostree \
     --mount=type=bind,from=fsync,src=/tmp/rpms,dst=/tmp/fsync-rpms \
     rpm-ostree cliwrap install-to-root / && \
-    rpm-ostree override replace --experimental \
+    rpm-ostree override replace \
+    --experimental \
         /tmp/fsync-rpms/kernel-[0-9]*.rpm \
         /tmp/fsync-rpms/kernel-core-*.rpm \
         /tmp/fsync-rpms/kernel-modules-*.rpm \
-        /tmp/fsync-rpms/kernel-uki-virt-*.rpm \
-    /usr/libexec/containerbuild/cleanup.sh && \
+        /tmp/fsync-rpms/kernel-uki-virt-*.rpm && \
     ostree container commit
 
 
@@ -62,11 +62,73 @@ RUN --mount=type=cache,dst=/var/cache/rpm-ostree \
     curl -Lo /etc/yum.repos.d/filotimo.repo https://download.opensuse.org/repositories/home:/tduck:/filotimolinux/Fedora_40/home:tduck:filotimolinux.repo && \
     curl -Lo /etc/yum.repos.d/klassy.repo https://download.opensuse.org/repositories/home:/paul4us/Fedora_40/home:paul4us.repo && \
     curl -Lo /etc/yum.repos.d/terra.repo https://terra.fyralabs.com/terra.repo && \
-    /usr/libexec/containerbuild/cleanup.sh && \
     ostree container commit
+
 RUN --mount=type=cache,dst=/var/cache/rpm-ostree \
     rpm-ostree install terra-release rpmfusion-free-release-tainted rpmfusion-nonfree-release-tainted && \
-    /usr/libexec/containerbuild/cleanup.sh && \
+    ostree container commit
+
+# Install Filotimo packages
+RUN --mount=type=cache,dst=/var/cache/rpm-ostree \
+    rpm-ostree override remove zram-generator-defaults fedora-logos desktop-backgrounds-compat \
+        --install filotimo-environment \
+        --install filotimo-backgrounds \
+        --install filotimo-branding && \
+    rpm-ostree install \
+        filotimo-kde-overrides \
+        msttcore-fonts-installer \
+        onedriver \
+        appimagelauncher \
+        filotimo-atychia \
+        filotimo-grub-theme \
+        filotimo-plymouth-theme && \
+    ostree container commit
+
+# Replace ppd with tuned
+RUN --mount=type=cache,dst=/var/cache/rpm-ostree \
+    rpm-ostree override remove \
+        power-profiles-daemon \
+        --install tuned \
+        --install tuned-ppd && \
+    ostree container commit
+
+# Install misc. packages
+RUN --mount=type=cache,dst=/var/cache/rpm-ostree \
+    rpm-ostree override remove noopenh264 --install openh264 && \
+    rpm-ostree install \
+        plasma-discover-rpm-ostree \
+        distrobox \
+        git \
+        vlc \
+        kdenetwork-filesharing \
+        ksystemlog \
+        ark \
+        kio-admin \
+        kleopatra \
+        firewall-config \
+        setroubleshoot \
+        openssl openssl-libs \
+        python3-pip \
+        nmap \
+        i2c-tools \
+        dmidecode \
+        pulseaudio-utils \
+        p7zip \
+        p7zip-plugins \
+        unzip \
+        unrar \
+        libheif libheif-tools \
+        gstreamer1-plugin-openh264 mozilla-openh264 \
+        mesa-vdpau-drivers-freeworld mesa-va-drivers-freeworld \
+        intel-media-driver libva-utils vdpauinfo \
+        nvidia-vaapi-driver \
+        libdvdcss \
+        ffmpeg \
+        epson-inkjet-printer-escpr2 \
+        foomatic \
+        foomatic-db-ppds \
+        gutenprint \
+        hplip && \
     ostree container commit
 
 ### 3. MODIFICATIONS

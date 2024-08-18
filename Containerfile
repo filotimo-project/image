@@ -70,16 +70,16 @@ RUN --mount=type=cache,dst=/var/cache/rpm-ostree \
 
 # Install Filotimo packages
 RUN --mount=type=cache,dst=/var/cache/rpm-ostree \
-    rpm-ostree override remove zram-generator-defaults fedora-logos desktop-backgrounds-compat \
+    rpm-ostree override remove zram-generator-defaults fedora-logos desktop-backgrounds-compat plasma-lookandfeel-fedora \
         --install filotimo-environment \
         --install filotimo-backgrounds \
-        --install filotimo-branding && \
+        --install filotimo-branding \
+        --install filotimo-kde-theme && \
     rpm-ostree install \
         filotimo-environment-fonts \
         filotimo-environment-ime \
         filotimo-environment-firefox \
         filotimo-kde-overrides \
-        filotimo-kde-theme \
         msttcore-fonts-installer \
         onedriver \
         appimagelauncher \

@@ -75,7 +75,11 @@ RUN --mount=type=cache,dst=/var/cache/rpm-ostree \
         --install filotimo-backgrounds \
         --install filotimo-branding && \
     rpm-ostree install \
+        filotimo-environment-fonts \
+        filotimo-environment-ime \
+        filotimo-environment-firefox \
         filotimo-kde-overrides \
+        filotimo-kde-theme \
         msttcore-fonts-installer \
         onedriver \
         appimagelauncher \

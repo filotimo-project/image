@@ -39,3 +39,7 @@ systemctl enable tuned-ppd
 
 # Mask hibernate - usually just causes problems
 systemctl mask hibernate.target
+
+# Regenerate grub and initramfs
+grub2-mkconfig -o /boot/grub2/grub.cfg
+dracut -f --regenerate-all

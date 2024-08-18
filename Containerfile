@@ -99,7 +99,6 @@ RUN --mount=type=cache,dst=/var/cache/rpm-ostree \
         plasma-discover-rpm-ostree \
         distrobox \
         git \
-        vlc \
         kdenetwork-filesharing \
         ksystemlog \
         ark \
@@ -124,10 +123,17 @@ RUN --mount=type=cache,dst=/var/cache/rpm-ostree \
         nvidia-vaapi-driver \
         libdvdcss \
         ffmpeg \
+        samba samba-usershares samba-dcerpc samba-ldb-ldap-modules samba-winbind-clients samba-winbind-modules \
+        rclone \
+        mesa-libGLU \
+        usbmuxd \
+        stress-ng \
+        epson-inkjet-printer-escpr \
         epson-inkjet-printer-escpr2 \
         foomatic \
         foomatic-db-ppds \
         gutenprint \
+        libimobiledevice \
         hplip && \
     ostree container commit
 

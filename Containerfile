@@ -139,7 +139,8 @@ RUN --mount=type=cache,dst=/var/cache/rpm-ostree \
         gutenprint \
         libimobiledevice \
         htop \
-        hplip && \
+        hplip \
+        podman && \
     ostree container commit
 
 ### 3. MODIFICATIONS

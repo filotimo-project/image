@@ -134,6 +134,7 @@ RUN --mount=type=cache,dst=/var/cache/rpm-ostree \
         foomatic-db-ppds \
         gutenprint \
         libimobiledevice \
+        htop \
         hplip && \
     ostree container commit
 

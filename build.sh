@@ -41,5 +41,6 @@ systemctl enable tuned-ppd
 systemctl mask hibernate.target
 
 # Regenerate grub and initramfs
-grub2-mkconfig -o /boot/grub2/grub.cfg
+grub2-mkconfig -o /etc/grub.cfg
+grub2-mkconfig -o /etc/grub-efi.cfg
 dracut -f --regenerate-all

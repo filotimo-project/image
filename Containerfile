@@ -146,7 +146,7 @@ RUN --mount=type=cache,dst=/var/cache/rpm-ostree \
         ffmpeg \
         mesa-vdpau-drivers-freeworld mesa-va-drivers-freeworld \
         intel-media-driver libva-intel-driver libva-utils vdpauinfo \
-        libdvdcss \
+        libdvdcss vlc \
         kde-cdemu-manager-kf6 \
         v4l2loopback pipewire-v4l2 libcamera-v4l2 \
         samba samba-usershares samba-dcerpc samba-ldb-ldap-modules samba-winbind-clients samba-winbind-modules \

@@ -1,7 +1,7 @@
 name: Build Filotimo ISO
 on:
   schedule:
-    - cron: '00 10 * * 0'  # 10:00am UTC every Sunday
+    - cron: '00 12 * * 2'
   workflow_dispatch:
   workflow_call:
 

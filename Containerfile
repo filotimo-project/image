@@ -44,7 +44,7 @@ ARG FEDORA_MAJOR_VERSION="${FEDORA_MAJOR_VERSION:-40}"
 FROM ghcr.io/ublue-os/fsync-kernel:${FEDORA_MAJOR_VERSION} AS fsync
 FROM ghcr.io/ublue-os/${SOURCE_IMAGE}${SOURCE_SUFFIX}:${SOURCE_TAG}
 
-# fsync kernel
+# fsync kernel - remove for f41 once upstream ublue ships it TODO
 RUN --mount=type=cache,dst=/var/cache/rpm-ostree \
     --mount=type=bind,from=fsync,src=/tmp/rpms,dst=/tmp/fsync-rpms \
     rpm-ostree cliwrap install-to-root / && \
@@ -78,17 +78,16 @@ RUN --mount=type=cache,dst=/var/cache/rpm-ostree \
     rpm-ostree install \
         filotimo-environment-fonts \
         filotimo-environment-ime \
-        filotimo-environment-firefox \
         filotimo-kde-overrides \
         msttcore-fonts-installer \
         onedriver \
         appimagelauncher \
+        bup kup python-libfuse \
         filotimo-atychia \
-        filotimo-grub-theme \
         filotimo-plymouth-theme && \
     ostree container commit
 
-# Replace ppd with tuned
+# Replace ppd with tuned - remove for f41 TODO
 RUN --mount=type=cache,dst=/var/cache/rpm-ostree \
     rpm-ostree override remove \
         power-profiles-daemon \
@@ -97,14 +96,18 @@ RUN --mount=type=cache,dst=/var/cache/rpm-ostree \
     ostree container commit
 
 # Install misc. packages
+# firefox is installed as a flatpak later for codec support and no fedora crap
+# libdvdcss has dubious legality
 RUN --mount=type=cache,dst=/var/cache/rpm-ostree \
-    rpm-ostree override remove noopenh264 --install openh264 && \
+    rpm-ostree override remove \
+        firefox firefox-langpacks \
+        nvtop \
+        toolbox && \
     rpm-ostree install \
         plasma-discover-rpm-ostree \
         distrobox \
-        git \
+        git gh \
         kdenetwork-filesharing \
-        ksystemlog \
         ark \
         kio-admin \
         kleopatra \
@@ -121,7 +124,6 @@ RUN --mount=type=cache,dst=/var/cache/rpm-ostree \
         unzip \
         unrar \
         libheif libheif-tools \
-        gstreamer1-plugin-openh264 mozilla-openh264 \
         mesa-vdpau-drivers-freeworld mesa-va-drivers-freeworld \
         intel-media-driver libva-utils vdpauinfo \
         nvidia-vaapi-driver \
@@ -138,7 +140,6 @@ RUN --mount=type=cache,dst=/var/cache/rpm-ostree \
         foomatic-db-ppds \
         gutenprint \
         libimobiledevice \
-        htop \
         hplip \
         podman && \
     ostree container commit

@@ -114,13 +114,12 @@ RUN --mount=type=cache,dst=/var/cache/rpm-ostree \
     ostree container commit
 
 # Install misc. packages
-# firefox is installed as a flatpak later for codec support and no fedora crap
 # libdvdcss has dubious legality
-# find out some way to get openh264 to work TODO
 RUN --mount=type=cache,dst=/var/cache/rpm-ostree \
     rpm-ostree override remove \
         ublue-os-update-services \
-        toolbox && \
+        toolbox \
+        noopenh264 && \
     rpm-ostree install \
         plasma-discover-rpm-ostree \
         distrobox \
@@ -142,11 +141,13 @@ RUN --mount=type=cache,dst=/var/cache/rpm-ostree \
         unzip \
         unrar \
         libheif libheif-tools \
+        gstreamer1-plugins-bad-free-extras gstreamer1-plugins-bad-freeworld gstreamer1-plugins-ugly gstreamer1-vaapi \
+        x265 \
+        ffmpeg \
         mesa-vdpau-drivers-freeworld mesa-va-drivers-freeworld \
-        intel-media-driver libva-utils vdpauinfo \
+        intel-media-driver libva-intel-driver libva-utils vdpauinfo \
         libdvdcss \
         kde-cdemu-manager-kf6 \
-        ffmpeg \
         v4l2loopback pipewire-v4l2 libcamera-v4l2 \
         samba samba-usershares samba-dcerpc samba-ldb-ldap-modules samba-winbind-clients samba-winbind-modules \
         rclone \
@@ -161,6 +162,7 @@ RUN --mount=type=cache,dst=/var/cache/rpm-ostree \
         libimobiledevice \
         hplip \
         htop \
+        virt-manager \
         podman && \
     sed -i 's@enabled=1@enabled=0@g' /etc/yum.repos.d/_copr_rok-cdemu.repo && \
     ostree container commit

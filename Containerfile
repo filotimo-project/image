@@ -11,7 +11,7 @@ FROM ghcr.io/ublue-os/${KERNEL_FLAVOR}-kernel:${FEDORA_MAJOR_VERSION} AS kernel
 FROM ghcr.io/ublue-os/akmods:${KERNEL_FLAVOR}-${FEDORA_MAJOR_VERSION} AS akmods
 FROM ghcr.io/ublue-os/akmods-extra:${KERNEL_FLAVOR}-${FEDORA_MAJOR_VERSION} AS akmods-extra
 
-FROM ${BASE_IMAGE}:${FEDORA_MAJOR_VERSION} as ${IMAGE_NAME}
+FROM ${BASE_IMAGE}:${FEDORA_MAJOR_VERSION} as filotimo
 
 ARG IMAGE_NAME="${IMAGE_NAME:-filotimo}"
 ARG FEDORA_MAJOR_VERSION="${FEDORA_MAJOR_VERSION:-40}"
@@ -174,9 +174,9 @@ RUN mkdir -p /var/lib/alternatives && \
 
 FROM ghcr.io/ublue-os/akmods-nvidia:${KERNEL_FLAVOR}-${FEDORA_MAJOR_VERSION} AS nvidia-akmods
 
-FROM ${IMAGE_NAME} as ${IMAGE_NAME}-nvidia
+FROM filotimo as filotimo-nvidia
 
-ARG IMAGE_NAME="${IMAGE_NAME:-filotimo}"
+ARG IMAGE_NAME="${IMAGE_NAME:-filotimo-nvidia}"
 ARG FEDORA_MAJOR_VERSION="${FEDORA_MAJOR_VERSION:-40}"
 ARG KERNEL_FLAVOR="${KERNEL_FLAVOR:-fsync}"
 ARG BASE_IMAGE_NAME="${BASE_IMAGE_NAME:-kinoite-main}"

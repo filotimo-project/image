@@ -86,12 +86,11 @@ jobs:
 
       - name: Matrix Variables
         run: |
-          if [ "${{ matrix.image_flavor }}" = "nvidia" ]
-            echo "TARGET=${{ github.event.repository.name }}-${{ matrix.image_flavor }}" >> $GITHUB_ENV
-          elif [ "${{ matrix.image_flavor }}" = "main" ]
-            echo "TARGET=${{ github.event.repository.name }}" >> $GITHUB_ENV
+          if [ "${{ matrix.image_flavor }}" = "nvidia" ]; then
+            echo "IMAGE_NAME=${{ github.event.repository.name }}-${{ matrix.image_flavor }}" >> $GITHUB_ENV
+          elif [ "${{ matrix.image_flavor }}" = "main" ]; then
+            echo "IMAGE_NAME=${{ github.event.repository.name }}" >> $GITHUB_ENV
           fi
-          echo "IMAGE_NAME=$TARGET" >> $GITHUB_ENV
 
       - name: Get Current Fedora Version
         id: labels
@@ -137,7 +136,7 @@ jobs:
           labels: ${{ steps.meta.outputs.labels }}
           oci: false
           extra-args: |
-            --target ${{ env.TARGET }}
+            --target ${{ env.IMAGE_NAME }}
 
       # Workaround bug where capital letters in your GitHub username make it impossible to push to GHCR.
       # https://github.com/macbre/push-to-ghcr/issues/12

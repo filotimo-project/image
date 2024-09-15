@@ -23,20 +23,21 @@ sed -i 's@\[Desktop Entry\]@\[Desktop Entry\]\nHidden=true@g' /usr/share/applica
 
 # Install OpenH264 on first boot
 SCRIPT_FILE="/usr/libexec/install-openh264"
-cat <<EOF | sudo tee "$SCRIPT_FILE" > /dev/null
+cat <<EOF | tee "$SCRIPT_FILE" > /dev/null
 #!/usr/bin/bash
 if rpm-ostree status | grep -q 'openh264\|mozilla-openh264\|gstreamer1-plugin-openh264'; then
     echo "OpenH264 is already installed."
 else
     echo "One or more OpenH264 packages were not installed, installing now..."
-    rpm-ostree install --assumeyes --idempotent --apply-live openh264 mozilla-openh264 gstreamer1-plugin-openh264
+    rpm-ostree override remove noopenh264 --install openh264 --install mozilla-openh264 --install gstreamer1-plugin-openh264
+    echo "Changes will take effect on next reboot."
 fi
 systemctl disable install-openh264.service
 EOF
 chmod +x "$SCRIPT_FILE"
 
 SERVICE_FILE="/etc/systemd/system/install-openh264.service"
-cat <<EOF | sudo tee "$SERVICE_FILE" > /dev/null
+cat <<EOF | tee "$SERVICE_FILE" > /dev/null
 [Unit]
 Description=Re-layer OpenH264 Codec
 After=network.target

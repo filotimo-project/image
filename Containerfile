@@ -118,8 +118,7 @@ RUN --mount=type=cache,dst=/var/cache/rpm-ostree \
 RUN --mount=type=cache,dst=/var/cache/rpm-ostree \
     rpm-ostree override remove \
         ublue-os-update-services \
-        toolbox \
-        noopenh264 && \
+        toolbox && \
     rpm-ostree install \
         plasma-discover-rpm-ostree \
         distrobox \

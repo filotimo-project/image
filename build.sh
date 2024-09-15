@@ -25,7 +25,12 @@ sed -i 's@\[Desktop Entry\]@\[Desktop Entry\]\nHidden=true@g' /usr/share/applica
 SCRIPT_FILE="/usr/libexec/install-openh264"
 cat <<EOF | sudo tee "$SCRIPT_FILE" > /dev/null
 #!/usr/bin/bash
-rpm-ostree install --assumeyes --apply-live openh264 mozilla-openh264 gstreamer1-plugin-openh264
+if rpm-ostree status | grep -q 'openh264\|mozilla-openh264\|gstreamer1-plugin-openh264'; then
+    echo "OpenH264 is already installed."
+else
+    echo "One or more OpenH264 packages were not installed, installing now..."
+    rpm-ostree install --assumeyes --idempotent --apply-live openh264 mozilla-openh264 gstreamer1-plugin-openh264
+fi
 systemctl disable install-openh264.service
 EOF
 chmod +x "$SCRIPT_FILE"
@@ -38,7 +43,7 @@ After=network.target
 
 [Service]
 Type=oneshot
-ExecStart=/usr/libexec/install-openh264
+ExecStart=$SCRIPT_FILE
 RemainAfterExit=true
 
 [Install]

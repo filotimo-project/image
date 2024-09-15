@@ -14,7 +14,6 @@ on:
   workflow_dispatch:
 
 env:
-  IMAGE_NAME: "${{ github.event.repository.name }}"  # the name of the image produced by this build, matches repo names
   IMAGE_DESC: "Filotimo Linux OCI Image"
   IMAGE_TAG: "latest"
   IMAGE_ARCH: "x86_64"
@@ -31,6 +30,12 @@ jobs:
       contents: read
       packages: write
       id-token: write
+    strategy:
+      fail-fast: false
+      matrix:
+        image_flavor:
+          - main
+          - nvidia
 
     steps:
       # Checkout push-to-registry action GitHub repository
@@ -80,12 +85,17 @@ jobs:
 
           echo "alias_tags=${alias_tags[*]}" >> $GITHUB_OUTPUT
 
+      - name: Matrix Variables
+        run: |
+          echo "IMAGE_NAME=${{ github.event.repository.name }}-${{ matrix.image_flavor }}" >> $GITHUB_ENV
+          echo "SOURCE_SUFFIX=-${{ matrix.image_flavor }}" >> $GITHUB_ENV
+
       - name: Get Current Fedora Version
         id: labels
         shell: bash
         run: |
           set -eo pipefail
-          ver=$(skopeo inspect docker://ghcr.io/ublue-os/kinoite-main:40 | jq -r '.Labels["org.opencontainers.image.version"]')
+          ver=$(skopeo inspect docker://ghcr.io/ublue-os/kinoite${{ env.SOURCE_SUFFIX }}:${{ env.MAJOR_VERSION }} | jq -r '.Labels["org.opencontainers.image.version"]')
           if [ -z "$ver" ] || [ "null" = "$ver" ]; then
             echo "inspected image version must not be empty or null"
             exit 1
@@ -118,8 +128,31 @@ jobs:
           image: ${{ env.IMAGE_NAME }}
           tags: |
             ${{ steps.generate-tags.outputs.alias_tags }}
+          build-args: |
+            SOURCE_SUFFIX=${{ env.SOURCE_SUFFIX }}
+            SOURCE_TAG=${{ env.MAJOR_VERSION }}
           labels: ${{ steps.meta.outputs.labels }}
           oci: false
+
+      - name: Check Secureboot
+        if: github.event_name == 'pull_request' && ( matrix.image_flavor == 'main' || matrix.image_flavor == 'nvidia' ) || github.event_name != 'pull_request'
+        shell: bash
+        run: |
+          set -x
+          if [[ ! $(command -v sbverify) || ! $(command -v curl) || ! $(command -v openssl) ]]; then
+            sudo apt update
+            sudo apt install sbsigntool curl openssl
+          fi
+          podman run -d --rm --name ${{env.IMAGE_NAME}}-$(echo "${{ steps.generate-tags.outputs.alias_tags }}" | cut -d " " -f 1) "${{ env.IMAGE_NAME }}":$(echo "${{ steps.generate-tags.outputs.alias_tags }}" | cut -d " " -f 1) sleep 1000
+          podman cp ${{env.IMAGE_NAME}}-$(echo "${{ steps.generate-tags.outputs.alias_tags }}" | cut -d " " -f 1):/usr/lib/modules/${{ env.kernel_release }}/vmlinuz .
+          podman rm -f ${{env.IMAGE_NAME}}-$(echo "${{ steps.generate-tags.outputs.alias_tags }}" | cut -d " " -f 1)
+          sbverify --list vmlinuz
+          curl --retry 3 -Lo kernel-sign.der https://github.com/ublue-os/kernel-cache/raw/main/certs/public_key.der
+          curl --retry 3 -Lo akmods.der https://github.com/ublue-os/kernel-cache/raw/main/certs/public_key_2.der
+          openssl x509 -in kernel-sign.der -out kernel-sign.crt
+          openssl x509 -in akmods.der -out akmods.crt
+          sbverify --cert kernel-sign.crt vmlinuz || exit 1
+          sbverify --cert akmods.crt vmlinuz || exit 1
 
       # Workaround bug where capital letters in your GitHub username make it impossible to push to GHCR.
       # https://github.com/macbre/push-to-ghcr/issues/12

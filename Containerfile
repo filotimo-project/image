@@ -68,6 +68,7 @@ RUN --mount=type=cache,dst=/var/cache/rpm-ostree \
     sed -i 's@enabled=1@enabled=0@g' /etc/yum.repos.d/negativo17-fedora-multimedia.repo && \
     sed -i 's@enabled=1@enabled=0@g' /etc/yum.repos.d/_copr_ublue-os-akmods.repo && \
     sed -i 's@enabled=1@enabled=0@g' /etc/yum.repos.d/_copr_hikariknight-looking-glass-kvmfr.repo && \
+    sed -i 's@enabled=1@enabled=0@g' /etc/yum.repos.d/_copr_rok-cdemu.repo && \
     ostree container commit
 
 # Install important repos
@@ -91,6 +92,7 @@ RUN --mount=type=cache,dst=/var/cache/rpm-ostree \
         --install filotimo-branding \
         --install filotimo-kde-theme && \
     rpm-ostree install \
+        filotimo-environment-firefox \
         filotimo-environment-fonts \
         filotimo-environment-ime \
         filotimo-kde-overrides \
@@ -113,9 +115,9 @@ RUN --mount=type=cache,dst=/var/cache/rpm-ostree \
 # Install misc. packages
 # firefox is installed as a flatpak later for codec support and no fedora crap
 # libdvdcss has dubious legality
+# find out some way to get openh264 to work TODO
 RUN --mount=type=cache,dst=/var/cache/rpm-ostree \
     rpm-ostree override remove \
-        firefox firefox-langpacks \
         ublue-os-update-services \
         toolbox && \
     rpm-ostree install \

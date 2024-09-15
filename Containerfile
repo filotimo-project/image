@@ -6,6 +6,7 @@ ARG SOURCE_ORG="${SOURCE_ORG:-ublue-os}"
 ARG BASE_IMAGE="ghcr.io/${SOURCE_ORG}/${BASE_IMAGE_NAME}"
 ARG IMAGE_VENDOR="${IMAGE_VENDOR:-filotimo}"
 ARG IMAGE_TAG="${IMAGE_TAG:-latest}"
+ARG TIMESTAMP_TAG="${TIMESTAMP_TAG:-}"
 
 FROM ghcr.io/ublue-os/${KERNEL_FLAVOR}-kernel:${FEDORA_MAJOR_VERSION} AS kernel
 FROM ghcr.io/ublue-os/akmods:${KERNEL_FLAVOR}-${FEDORA_MAJOR_VERSION} AS akmods
@@ -21,6 +22,7 @@ ARG SOURCE_ORG="${SOURCE_ORG:-ublue-os}"
 ARG BASE_IMAGE="ghcr.io/${SOURCE_ORG}/${BASE_IMAGE_NAME}"
 ARG IMAGE_VENDOR="${IMAGE_VENDOR:-filotimo}"
 ARG IMAGE_TAG="${IMAGE_TAG:-latest}"
+ARG TIMESTAMP_TAG="${TIMESTAMP_TAG:-}"
 
 # fsync kernel - remove for f41 once upstream ublue ships it TODO
 RUN --mount=type=cache,dst=/var/cache/rpm-ostree \
@@ -68,7 +70,6 @@ RUN --mount=type=cache,dst=/var/cache/rpm-ostree \
     sed -i 's@enabled=1@enabled=0@g' /etc/yum.repos.d/negativo17-fedora-multimedia.repo && \
     sed -i 's@enabled=1@enabled=0@g' /etc/yum.repos.d/_copr_ublue-os-akmods.repo && \
     sed -i 's@enabled=1@enabled=0@g' /etc/yum.repos.d/_copr_hikariknight-looking-glass-kvmfr.repo && \
-    sed -i 's@enabled=1@enabled=0@g' /etc/yum.repos.d/_copr_rok-cdemu.repo && \
     ostree container commit
 
 # Install important repos
@@ -161,6 +162,7 @@ RUN --mount=type=cache,dst=/var/cache/rpm-ostree \
         hplip \
         htop \
         podman && \
+    sed -i 's@enabled=1@enabled=0@g' /etc/yum.repos.d/_copr_rok-cdemu.repo && \
     ostree container commit
 
 # Add modifications and finalize
@@ -186,6 +188,7 @@ ARG SOURCE_ORG="${SOURCE_ORG:-ublue-os}"
 ARG BASE_IMAGE="ghcr.io/${SOURCE_ORG}/${BASE_IMAGE_NAME}"
 ARG IMAGE_VENDOR="${IMAGE_VENDOR:-filotimo}"
 ARG IMAGE_TAG="${IMAGE_TAG:-latest}"
+ARG TIMESTAMP_TAG="${TIMESTAMP_TAG:-}"
 
 # Install NVIDIA driver
 RUN --mount=type=cache,dst=/var/cache/rpm-ostree \

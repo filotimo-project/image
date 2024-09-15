@@ -83,6 +83,7 @@ jobs:
           done
 
           echo "alias_tags=${alias_tags[*]}" >> $GITHUB_OUTPUT
+          echo "TIMESTAMP_TAG=$TIMESTAMP" >> $GITHUB_ENV
 
       - name: Matrix Variables
         run: |
@@ -132,7 +133,9 @@ jobs:
             ${{ steps.generate-tags.outputs.alias_tags }}
           build-args: |
             IMAGE_NAME=${{ env.IMAGE_NAME }}
+            IMAGE_TAG=${{ env.IMAGE_TAG }}
             FEDORA_MAJOR_VERSION=${{ env.MAJOR_VERSION }}
+            TIMESTAMP_TAG=${{ env.TIMESTAMP_TAG }}
           labels: ${{ steps.meta.outputs.labels }}
           oci: false
           extra-args: |

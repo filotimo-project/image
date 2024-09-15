@@ -196,7 +196,7 @@ RUN --mount=type=cache,dst=/var/cache/rpm-ostree \
     --mount=type=bind,from=nvidia-akmods,src=/rpms,dst=/tmp/akmods-rpms \
     curl -Lo /tmp/nvidia-install.sh https://raw.githubusercontent.com/ublue-os/hwe/main/nvidia-install.sh && \
     chmod +x /tmp/nvidia-install.sh && \
-    IMAGE_NAME="${BASE_IMAGE_NAME}" \
+    IMAGE_NAME="kinoite" \
     /tmp/nvidia-install.sh && \
     rpm-ostree install nvidia-vaapi-driver && \
     ostree container commit

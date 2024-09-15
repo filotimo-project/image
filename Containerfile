@@ -1,51 +1,30 @@
-## 1. BUILD ARGS
-# These allow changing the produced image by passing different build args to adjust
-# the source from which your image is built.
-# Build args can be provided on the commandline when building locally with:
-#   podman build -f Containerfile --build-arg FEDORA_VERSION=40 -t local-image
+ARG IMAGE_NAME="${IMAGE_NAME:-filotimo}"
+ARG FEDORA_MAJOR_VERSION="${FEDORA_MAJOR_VERSION:-40}"
+ARG KERNEL_FLAVOR="${KERNEL_FLAVOR:-fsync}"
+ARG BASE_IMAGE_NAME="${BASE_IMAGE_NAME:-kinoite-main}"
+ARG SOURCE_ORG="${SOURCE_ORG:-ublue-os}"
+ARG BASE_IMAGE="ghcr.io/${SOURCE_ORG}/${BASE_IMAGE_NAME}"
+ARG IMAGE_VENDOR="${IMAGE_VENDOR:-filotimo}"
+ARG IMAGE_TAG="${IMAGE_TAG:-latest}"
 
-# SOURCE_IMAGE arg can be anything from ublue upstream which matches your desired version:
-# See list here: https://github.com/orgs/ublue-os/packages?repo_name=main
-# - "silverblue"
-# - "kinoite"
-# - "sericea"
-# - "onyx"
-# - "lazurite"
-# - "vauxite"
-# - "base"
-#
-#  "aurora", "bazzite", "bluefin" or "ucore" may also be used but have different suffixes.
-ARG SOURCE_IMAGE="kinoite"
+FROM ghcr.io/ublue-os/${KERNEL_FLAVOR}-kernel:${FEDORA_MAJOR_VERSION} AS kernel
+FROM ghcr.io/ublue-os/akmods:${KERNEL_FLAVOR}-${FEDORA_MAJOR_VERSION} AS akmods
+FROM ghcr.io/ublue-os/akmods-extra:${KERNEL_FLAVOR}-${FEDORA_MAJOR_VERSION} AS akmods-extra
 
-## SOURCE_SUFFIX arg should include a hyphen and the appropriate suffix name
-# These examples all work for silverblue/kinoite/sericea/onyx/lazurite/vauxite/base
-# - "-main"
-# - "-nvidia"
-# - "-asus"
-# - "-asus-nvidia"
-# - "-surface"
-# - "-surface-nvidia"
-#
-# aurora, bazzite and bluefin each have unique suffixes. Please check the specific image.
-# ucore has the following possible suffixes
-# - stable
-# - stable-nvidia
-# - stable-zfs
-# - stable-nvidia-zfs
-# - (and the above with testing rather than stable)
-ARG SOURCE_SUFFIX="-main"
+FROM ${BASE_IMAGE}:${FEDORA_MAJOR_VERSION} as ${IMAGE_NAME}
 
-## SOURCE_TAG arg must be a version built for the specific image: eg, 39, 40, gts, latest
-ARG SOURCE_TAG="40"
-
-### 2. SOURCE IMAGE
-## this is a standard Containerfile FROM using the build ARGs above to select the right upstream image
-FROM ghcr.io/ublue-os/fsync-kernel:${SOURCE_TAG} AS fsync
-FROM ghcr.io/ublue-os/${SOURCE_IMAGE}${SOURCE_SUFFIX}:${SOURCE_TAG}
+ARG IMAGE_NAME="${IMAGE_NAME:-filotimo}"
+ARG FEDORA_MAJOR_VERSION="${FEDORA_MAJOR_VERSION:-40}"
+ARG KERNEL_FLAVOR="${KERNEL_FLAVOR:-fsync}"
+ARG BASE_IMAGE_NAME="${BASE_IMAGE_NAME:-kinoite-main}"
+ARG SOURCE_ORG="${SOURCE_ORG:-ublue-os}"
+ARG BASE_IMAGE="ghcr.io/${SOURCE_ORG}/${BASE_IMAGE_NAME}"
+ARG IMAGE_VENDOR="${IMAGE_VENDOR:-filotimo}"
+ARG IMAGE_TAG="${IMAGE_TAG:-latest}"
 
 # fsync kernel - remove for f41 once upstream ublue ships it TODO
 RUN --mount=type=cache,dst=/var/cache/rpm-ostree \
-    --mount=type=bind,from=fsync,src=/tmp/rpms,dst=/tmp/fsync-rpms \
+    --mount=type=bind,from=kernel,src=/tmp/rpms,dst=/tmp/fsync-rpms \
     rpm-ostree cliwrap install-to-root / && \
     rpm-ostree override replace \
     --experimental \
@@ -55,20 +34,57 @@ RUN --mount=type=cache,dst=/var/cache/rpm-ostree \
         /tmp/fsync-rpms/kernel-uki-virt-*.rpm && \
     ostree container commit
 
+# Install akmod rpms for various firmware and features
+# add and disable negativo immediately due to incompatibility with RPMFusion although it's required for akmods
+RUN --mount=type=cache,dst=/var/cache/rpm-ostree \
+    curl -Lo /usr/bin/copr https://raw.githubusercontent.com/ublue-os/COPR-command/main/copr && \
+    chmod +x /usr/bin/copr && \
+    curl -Lo /etc/yum.repos.d/_copr_hikariknight-looking-glass-kvmfr.repo https://copr.fedorainfracloud.org/coprs/hikariknight/looking-glass-kvmfr/repo/fedora-"${FEDORA_MAJOR_VERSION}"/hikariknight-looking-glass-kvmfr-fedora-"${FEDORA_MAJOR_VERSION}".repo && \
+    curl -Lo /etc/yum.repos.d/_copr_rok-cdemu.repo https://copr.fedorainfracloud.org/coprs/rok/cdemu/repo/fedora-"${FEDORA_MAJOR_VERSION}"/rok-cdemu-fedora-"${FEDORA_MAJOR_VERSION}".repo && \
+    ostree container commit
+
+RUN --mount=type=cache,dst=/var/cache/rpm-ostree \
+    --mount=type=bind,from=akmods,src=/rpms,dst=/tmp/akmods-rpms \
+    --mount=type=bind,from=akmods-extra,src=/rpms,dst=/tmp/akmods-extra-rpms \
+    curl -Lo /etc/yum.repos.d/negativo17-fedora-multimedia.repo https://negativo17.org/repos/fedora-multimedia.repo && \
+    sed -i 's@enabled=0@enabled=1@g' /etc/yum.repos.d/negativo17-fedora-multimedia.repo && \
+    sed -i 's@enabled=0@enabled=1@g' /etc/yum.repos.d/_copr_ublue-os-akmods.repo && \
+    rpm-ostree install \
+        /tmp/akmods-rpms/kmods/*kvmfr*.rpm \
+        /tmp/akmods-rpms/kmods/*xone*.rpm \
+        /tmp/akmods-rpms/kmods/*openrazer*.rpm \
+        /tmp/akmods-rpms/kmods/*v4l2loopback*.rpm \
+        /tmp/akmods-rpms/kmods/*wl*.rpm \
+        /tmp/akmods-rpms/kmods/*framework-laptop*.rpm \
+        /tmp/akmods-extra-rpms/kmods/*gcadapter_oc*.rpm \
+        /tmp/akmods-extra-rpms/kmods/*nct6687*.rpm \
+        /tmp/akmods-extra-rpms/kmods/*zenergy*.rpm \
+        /tmp/akmods-extra-rpms/kmods/*vhba*.rpm \
+        /tmp/akmods-extra-rpms/kmods/*ayaneo-platform*.rpm \
+        /tmp/akmods-extra-rpms/kmods/*ayn-platform*.rpm \
+        /tmp/akmods-extra-rpms/kmods/*bmi260*.rpm \
+        /tmp/akmods-extra-rpms/kmods/*ryzen-smu*.rpm \
+        /tmp/akmods-extra-rpms/kmods/*evdi*.rpm && \
+    sed -i 's@enabled=1@enabled=0@g' /etc/yum.repos.d/negativo17-fedora-multimedia.repo && \
+    sed -i 's@enabled=1@enabled=0@g' /etc/yum.repos.d/_copr_ublue-os-akmods.repo && \
+    sed -i 's@enabled=1@enabled=0@g' /etc/yum.repos.d/_copr_hikariknight-looking-glass-kvmfr.repo && \
+    ostree container commit
 
 # Install important repos
 RUN --mount=type=cache,dst=/var/cache/rpm-ostree \
-    curl -Lo /etc/yum.repos.d/filotimo.repo https://download.opensuse.org/repositories/home:/tduck:/filotimolinux/Fedora_40/home:tduck:filotimolinux.repo && \
-    curl -Lo /etc/yum.repos.d/klassy.repo https://download.opensuse.org/repositories/home:/paul4us/Fedora_40/home:paul4us.repo && \
+    echo "${FEDORA_MAJOR_VERSION}" && \
+    curl -Lo /etc/yum.repos.d/filotimo.repo https://download.opensuse.org/repositories/home:/tduck:/filotimolinux/Fedora_"${FEDORA_MAJOR_VERSION}"/home:tduck:filotimolinux.repo && \
+    curl -Lo /etc/yum.repos.d/klassy.repo https://download.opensuse.org/repositories/home:/paul4us/Fedora_"${FEDORA_MAJOR_VERSION}"/home:paul4us.repo && \
+    curl -Lo /etc/yum.repos.d/_copr_rodoma92-kde-cdemu-manager.repo https://copr.fedorainfracloud.org/coprs/rodoma92/kde-cdemu-manager/repo/fedora-"${FEDORA_MAJOR_VERSION}"/rodoma92-kde-cdemu-manager-fedora-"${FEDORA_MAJOR_VERSION}".repo && \
     curl -Lo /etc/yum.repos.d/terra.repo https://terra.fyralabs.com/terra.repo && \
-    ostree container commit
-
-RUN --mount=type=cache,dst=/var/cache/rpm-ostree \
-    rpm-ostree install terra-release rpmfusion-free-release-tainted rpmfusion-nonfree-release-tainted && \
+    curl -Lo /etc/flatpak/remotes.d/flathub.flatpakrepo https://dl.flathub.org/repo/flathub.flatpakrepo && \
+    rpm-ostree install rpmfusion-free-release-tainted rpmfusion-nonfree-release-tainted && \
     ostree container commit
 
 # Install Filotimo packages
+# TODO figure out grub theme
 RUN --mount=type=cache,dst=/var/cache/rpm-ostree \
+    rm -rf /var/cache/rpm-ostree/repomd && \
     rpm-ostree override remove zram-generator-defaults fedora-logos desktop-backgrounds-compat plasma-lookandfeel-fedora \
         --install filotimo-environment \
         --install filotimo-backgrounds \
@@ -100,7 +116,7 @@ RUN --mount=type=cache,dst=/var/cache/rpm-ostree \
 RUN --mount=type=cache,dst=/var/cache/rpm-ostree \
     rpm-ostree override remove \
         firefox firefox-langpacks \
-        nvtop \
+        ublue-os-update-services \
         toolbox && \
     rpm-ostree install \
         plasma-discover-rpm-ostree \
@@ -125,9 +141,10 @@ RUN --mount=type=cache,dst=/var/cache/rpm-ostree \
         libheif libheif-tools \
         mesa-vdpau-drivers-freeworld mesa-va-drivers-freeworld \
         intel-media-driver libva-utils vdpauinfo \
-        nvidia-vaapi-driver \
         libdvdcss \
+        kde-cdemu-manager-kf6 \
         ffmpeg \
+        v4l2loopback pipewire-v4l2 libcamera-v4l2 \
         samba samba-usershares samba-dcerpc samba-ldb-ldap-modules samba-winbind-clients samba-winbind-modules \
         rclone \
         mesa-libGLU \
@@ -140,19 +157,48 @@ RUN --mount=type=cache,dst=/var/cache/rpm-ostree \
         gutenprint \
         libimobiledevice \
         hplip \
+        htop \
         podman && \
     ostree container commit
 
-### 3. MODIFICATIONS
-## make modifications desired in your image and install packages by modifying the build.sh script
-## the following RUN directive does all the things required to run "build.sh" as recommended.
-
+# Add modifications and finalize
 COPY build.sh /tmp/build.sh
+COPY build-initramfs.sh /tmp/build-initramfs.sh
+COPY image-info.sh /tmp/image-info.sh
 
 RUN mkdir -p /var/lib/alternatives && \
     /tmp/build.sh && \
+    /tmp/build-initramfs.sh && \
+    IMAGE_FLAVOR=main /tmp/image-info.sh && \
     ostree container commit
-## NOTES:
-# - /var/lib/alternatives is required to prevent failure with some RPM installs
-# - All RUN commands must end with ostree container commit
-#   see: https://coreos.github.io/rpm-ostree/container/#using-ostree-container-commit
+
+FROM ghcr.io/ublue-os/akmods-nvidia:${KERNEL_FLAVOR}-${FEDORA_MAJOR_VERSION} AS nvidia-akmods
+
+FROM ${IMAGE_NAME} as ${IMAGE_NAME}-nvidia
+
+ARG IMAGE_NAME="${IMAGE_NAME:-filotimo}"
+ARG FEDORA_MAJOR_VERSION="${FEDORA_MAJOR_VERSION:-40}"
+ARG KERNEL_FLAVOR="${KERNEL_FLAVOR:-fsync}"
+ARG BASE_IMAGE_NAME="${BASE_IMAGE_NAME:-kinoite-main}"
+ARG SOURCE_ORG="${SOURCE_ORG:-ublue-os}"
+ARG BASE_IMAGE="ghcr.io/${SOURCE_ORG}/${BASE_IMAGE_NAME}"
+ARG IMAGE_VENDOR="${IMAGE_VENDOR:-filotimo}"
+ARG IMAGE_TAG="${IMAGE_TAG:-latest}"
+
+# Install NVIDIA driver
+RUN --mount=type=cache,dst=/var/cache/rpm-ostree \
+    --mount=type=bind,from=nvidia-akmods,src=/rpms,dst=/tmp/akmods-rpms \
+    curl -Lo /tmp/nvidia-install.sh https://raw.githubusercontent.com/ublue-os/hwe/main/nvidia-install.sh && \
+    chmod +x /tmp/nvidia-install.sh && \
+    IMAGE_NAME="${BASE_IMAGE_NAME}" \
+    /tmp/nvidia-install.sh && \
+    rpm-ostree install nvidia-vaapi-driver && \
+    ostree container commit
+
+COPY build-initramfs.sh /tmp/build-initramfs.sh
+COPY image-info.sh /tmp/image-info.sh
+
+# Finalize
+RUN /tmp/build-initramfs.sh && \
+    IMAGE_FLAVOR=nvidia /tmp/image-info.sh && \
+    ostree container commit

@@ -1,9 +1,9 @@
 name: Build Filotimo ISO
-on:
-  schedule:
-    - cron: '00 12 * * 2'
-  workflow_dispatch:
-  workflow_call:
+#on:
+#  schedule:
+#    - cron: '00 12 * * 2'
+#  workflow_dispatch:
+#  workflow_call:
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref || github.run_id }}-iso
@@ -30,7 +30,7 @@ jobs:
         shell: bash
         run: |
           set -ex
-          image="ghcr.io/filotimo-project/image:latest"
+          image="ghcr.io/filotimo-project/filotimo:latest"
           # Make temp space
           TEMP_FLATPAK_INSTALL_DIR=$(mktemp -d -p ${{ github.workspace }} flatpak.XXX)
           # Get list of refs from directory

@@ -37,10 +37,9 @@ SCRIPT_FILE="/usr/libexec/install-openh264"
 cat <<EOF | tee "$SCRIPT_FILE" > /dev/null
 #!/usr/bin/bash
 if rpm-ostree status | grep -q 'openh264\|mozilla-openh264\|gstreamer1-plugin-openh264'; then
-    echo "OpenH264 is already installed."
-    systemctl disable install-openh264.service
+    echo "OpenH264 is already layered."
 else
-    echo "One or more OpenH264 packages were not installed, installing now..."
+    echo "One or more OpenH264 packages were not layered, installing now..."
     rpm-ostree override remove noopenh264 --install openh264 --install mozilla-openh264 --install gstreamer1-plugin-openh264
     echo "Changes will take effect on next reboot."
 fi

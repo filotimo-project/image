@@ -195,11 +195,14 @@ ARG TIMESTAMP_TAG="${TIMESTAMP_TAG:-}"
 # Install NVIDIA driver
 RUN --mount=type=cache,dst=/var/cache/rpm-ostree \
     --mount=type=bind,from=nvidia-akmods,src=/rpms,dst=/tmp/akmods-rpms \
+    curl -Lo /etc/yum.repos.d/_copr_jhyub-supergfxctl-plasmoid.repo https://copr.fedorainfracloud.org/coprs/jhyub/supergfxctl-plasmoid/repo/fedora-"${FEDORA_MAJOR_VERSION}"/jhyub-supergfxctl-plasmoid-fedora-"${FEDORA_MAJOR_VERSION}".repo && \
     curl -Lo /tmp/nvidia-install.sh https://raw.githubusercontent.com/ublue-os/hwe/main/nvidia-install.sh && \
     chmod +x /tmp/nvidia-install.sh && \
     IMAGE_NAME="kinoite" \
     /tmp/nvidia-install.sh && \
     rpm-ostree install nvidia-vaapi-driver && \
+    systemctl enable supergfxd && \
+    sed -i 's@enabled=1@enabled=0@g' /etc/yum.repos.d/_copr_jhyub-supergfxctl-plasmoid.repo
     ostree container commit
 
 COPY build-initramfs.sh /tmp/build-initramfs.sh

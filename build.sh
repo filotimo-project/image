@@ -28,6 +28,10 @@ DefaultProfile=Filotimo.profile" >> /etc/xdg/konsolerc
 # Set rpm-ostree to check for updates automatically, not stage automatically
 sed -i "s/^AutomaticUpdatePolicy=.*/AutomaticUpdatePolicy=check/" /etc/rpm-ostreed.conf
 
+# Remove fcitx default icons
+rm -rf /usr/share/icons/breeze/status/22/fcitx.svg
+rm -rf /usr/share/icons/breeze/status/24/fcitx.svg
+
 # Install OpenH264 on first boot
 SCRIPT_FILE="/usr/libexec/install-openh264"
 cat <<EOF | tee "$SCRIPT_FILE" > /dev/null

@@ -123,6 +123,7 @@ RUN --mount=type=cache,dst=/var/cache/rpm-ostree \
         plasma-discover-rpm-ostree \
         distrobox \
         git gh \
+        nodejs-bash-language-server \
         kdenetwork-filesharing \
         ark \
         kio-admin \

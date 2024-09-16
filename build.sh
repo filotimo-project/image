@@ -21,6 +21,13 @@ mkdir -p /etc/skel/.local/share/containers/storage/volumes
 sed -i 's@\[Desktop Entry\]@\[Desktop Entry\]\nHidden=true@g' /usr/share/applications/htop.desktop
 sed -i 's@\[Desktop Entry\]@\[Desktop Entry\]\nHidden=true@g' /usr/share/applications/nvtop.desktop
 
+# Set Konsole default profile
+echo "[Desktop Entry]
+DefaultProfile=Filotimo.profile" >> /etc/xdg/konsolerc
+
+# Set rpm-ostree to check for updates automatically, not stage automatically
+sed -i "s/^AutomaticUpdatePolicy=.*/AutomaticUpdatePolicy=check/" /etc/rpm-ostreed.conf
+
 # Install OpenH264 on first boot
 SCRIPT_FILE="/usr/libexec/install-openh264"
 cat <<EOF | tee "$SCRIPT_FILE" > /dev/null
@@ -35,7 +42,6 @@ else
 fi
 EOF
 chmod +x "$SCRIPT_FILE"
-
 SERVICE_FILE="/etc/systemd/system/install-openh264.service"
 cat <<EOF | tee "$SERVICE_FILE" > /dev/null
 [Unit]

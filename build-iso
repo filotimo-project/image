@@ -26,7 +26,7 @@ sudo podman run --rm --privileged \
 --volume "${TEMP_FLATPAK_INSTALL_DIR}":/temp_flatpak_install_dir \
 ${image} /temp_flatpak_install_dir/script.sh
 sudo podman rmi ${image}
-sudo podman run --name=container-installer --privileged --volume ./:/github/workspace/ \
+sudo podman run --name=container-installer --replace --privileged --volume ./:/github/workspace/ \
 ghcr.io/jasonn3/build-container-installer:v1.2.2 \
 ARCH=x86_64 \
 IMAGE_NAME=filotimo \

@@ -37,12 +37,6 @@ rm -rf /usr/share/icons/breeze/status/24/fcitx.svg
 sed -i '/\[remote "fedora"\]/,/^\[/d' /var/lib/flatpak/repo/config
 sed -i '/\[remote "fedora-testing"\]/,/^\[/d' /var/lib/flatpak/repo/config
 
-# Override Vesktop and Discord to use X11 since IME is broken under wayland and it's still buggy
-echo "[Context]
-sockets=!wayland;" > /var/lib/flatpak/overrides/dev.vencord.Vesktop
-echo "[Context]
-sockets=!wayland;" > /var/lib/flatpak/overrides/com.discordapp.Discord
-
 # Install OpenH264 on first boot
 SCRIPT_FILE="/usr/libexec/install-openh264"
 cat <<EOF | tee "$SCRIPT_FILE" > /dev/null
@@ -71,3 +65,29 @@ RemainAfterExit=true
 WantedBy=multi-user.target
 EOF
 systemctl enable install-openh264.service
+
+# Remove fedora and fedora-testing flatpak remotes
+SCRIPT_FILE="/usr/libexec/remove-fedora-flatpak-remotes"
+cat <<EOF | tee "$SCRIPT_FILE" > /dev/null
+#!/usr/bin/bash
+flatpak remote-add --if-not-exists --system flathub https://dl.flathub.org/repo/flathub.flatpakrepo
+flatpak remote-delete --system fedora
+flatpak remote-delete --system fedora-testing
+systemctl disable remove-fedora-flatpak-remotes.service
+EOF
+chmod +x "$SCRIPT_FILE"
+SERVICE_FILE="/etc/systemd/system/remove-fedora-flatpak-remotes.service"
+cat <<EOF | tee "$SERVICE_FILE" > /dev/null
+[Unit]
+Description=Remove fedora and fedora-testing Flatpak remotes
+After=network-online.target
+
+[Service]
+Type=oneshot
+ExecStart=$SCRIPT_FILE
+RemainAfterExit=true
+
+[Install]
+WantedBy=multi-user.target
+EOF
+systemctl enable remove-fedora-flatpak-remotes.service

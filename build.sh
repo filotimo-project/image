@@ -33,10 +33,6 @@ sed -i "s/^AutomaticUpdatePolicy=.*/AutomaticUpdatePolicy=check/" /etc/rpm-ostre
 rm -rf /usr/share/icons/breeze/status/22/fcitx.svg
 rm -rf /usr/share/icons/breeze/status/24/fcitx.svg
 
-# Remove fedora and fedora-testing flatpak remotes
-sed -i '/\[remote "fedora"\]/,/^\[/d' /var/lib/flatpak/repo/config
-sed -i '/\[remote "fedora-testing"\]/,/^\[/d' /var/lib/flatpak/repo/config
-
 # Install OpenH264 on first boot
 SCRIPT_FILE="/usr/libexec/install-openh264"
 cat <<EOF | tee "$SCRIPT_FILE" > /dev/null

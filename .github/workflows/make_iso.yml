@@ -1,9 +1,9 @@
 name: Build Filotimo ISO
-#on:
-#  schedule:
-#    - cron: '00 12 * * 2'
-#  workflow_dispatch:
-#  workflow_call:
+on:
+  schedule:
+    - cron: '00 12 * * 2'
+  workflow_dispatch:
+  workflow_call:
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref || github.run_id }}-iso
@@ -61,19 +61,19 @@ jobs:
         id: build
         with:
             arch: x86_64
-            image_name: image
+            image_name: filotimo
             image_repo: ghcr.io/filotimo-project
             image_tag: latest
             version: 40
             variant: "Kinoite"
             iso_name: filotimo-latest-40.iso
             secure_boot_key_url: "https://github.com/ublue-os/akmods/raw/main/certs/public_key.der"
+            enrollment_password: filotimo
             enable_cache_dnf: "false"
             enable_cache_skopeo: "false"
             flatpak_remote_refs_dir: /github/workspace/flatpaks/
-            enrollment_password: filotimo
-            enable_flatpak_dependencies: "false"
             web_ui: true
+            enable_flatpak_dependencies: "false"
 
         # This example is for uploading your ISO as a GitHub artifact. You can do something similar using any cloud storage, so long as you copy the output
       - name: Upload ISO as artifact

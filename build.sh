@@ -61,31 +61,3 @@ RemainAfterExit=true
 WantedBy=multi-user.target
 EOF
 systemctl enable postinstall-install-openh264.service
-
-# Remove fedora and fedora-testing flatpak remotes
-SCRIPT_FILE="/usr/libexec/postinstall-manage-flatpaks"
-cat <<EOF | tee "$SCRIPT_FILE" > /dev/null
-#!/usr/bin/bash
-flatpak remote-delete --force flathub || true
-flatpak remote-add    --if-not-exists flathub https://dl.flathub.org/repo/flathub.flatpakrepo
-flatpak remote-delete --force fedora || true
-flatpak remote-delete --force fedora-testing || true
-systemctl disable postinstall-manage-flatpaks.service
-EOF
-chmod +x "$SCRIPT_FILE"
-SERVICE_FILE="/etc/systemd/system/postinstall-manage-flatpaks.service"
-cat <<EOF | tee "$SERVICE_FILE" > /dev/null
-[Unit]
-Description=Manage Flatpak remotes
-After=network-online.target
-
-[Service]
-Type=oneshot
-ExecStart=$SCRIPT_FILE
-RemainAfterExit=true
-
-[Install]
-WantedBy=multi-user.target
-EOF
-systemctl enable postinstall-manage-flatpaks.service
-

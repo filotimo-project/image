@@ -34,7 +34,7 @@ rm -rf /usr/share/icons/breeze/status/22/fcitx.svg
 rm -rf /usr/share/icons/breeze/status/24/fcitx.svg
 
 # Install OpenH264 on first boot
-SCRIPT_FILE="/usr/libexec/install-openh264"
+SCRIPT_FILE="/usr/libexec/postinstall-install-openh264"
 cat <<EOF | tee "$SCRIPT_FILE" > /dev/null
 #!/usr/bin/bash
 if rpm-ostree status | grep -q 'openh264\|mozilla-openh264\|gstreamer1-plugin-openh264'; then
@@ -46,7 +46,7 @@ else
 fi
 EOF
 chmod +x "$SCRIPT_FILE"
-SERVICE_FILE="/etc/systemd/system/install-openh264.service"
+SERVICE_FILE="/etc/systemd/system/postinstall-install-openh264.service"
 cat <<EOF | tee "$SERVICE_FILE" > /dev/null
 [Unit]
 Description=Re-layer OpenH264 Codec
@@ -60,22 +60,23 @@ RemainAfterExit=true
 [Install]
 WantedBy=multi-user.target
 EOF
-systemctl enable install-openh264.service
+systemctl enable postinstall-install-openh264.service
 
 # Remove fedora and fedora-testing flatpak remotes
-SCRIPT_FILE="/usr/libexec/remove-fedora-flatpak-remotes"
+SCRIPT_FILE="/usr/libexec/postinstall-manage-flatpaks"
 cat <<EOF | tee "$SCRIPT_FILE" > /dev/null
 #!/usr/bin/bash
-flatpak remote-add --if-not-exists --system flathub https://dl.flathub.org/repo/flathub.flatpakrepo
-flatpak remote-delete --system fedora
-flatpak remote-delete --system fedora-testing
-systemctl disable remove-fedora-flatpak-remotes.service
+flatpak remote-delete --force flathub || true
+flatpak remote-add    --if-not-exists flathub https://dl.flathub.org/repo/flathub.flatpakrepo
+flatpak remote-delete --force fedora || true
+flatpak remote-delete --force fedora-testing || true
+systemctl disable postinstall-manage-flatpaks.service
 EOF
 chmod +x "$SCRIPT_FILE"
-SERVICE_FILE="/etc/systemd/system/remove-fedora-flatpak-remotes.service"
+SERVICE_FILE="/etc/systemd/system/postinstall-manage-flatpaks.service"
 cat <<EOF | tee "$SERVICE_FILE" > /dev/null
 [Unit]
-Description=Remove fedora and fedora-testing Flatpak remotes
+Description=Manage Flatpak remotes
 After=network-online.target
 
 [Service]
@@ -86,4 +87,5 @@ RemainAfterExit=true
 [Install]
 WantedBy=multi-user.target
 EOF
-systemctl enable remove-fedora-flatpak-remotes.service
+systemctl enable postinstall-manage-flatpaks.service
+

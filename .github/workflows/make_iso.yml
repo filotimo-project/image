@@ -72,7 +72,6 @@ jobs:
             enable_cache_dnf: "false"
             enable_cache_skopeo: "false"
             flatpak_remote_refs_dir: /github/workspace/flatpaks/
-            web_ui: true
             enable_flatpak_dependencies: "false"
 
         # This example is for uploading your ISO as a GitHub artifact. You can do something similar using any cloud storage, so long as you copy the output

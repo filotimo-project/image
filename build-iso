@@ -38,6 +38,5 @@ ISO_NAME=filotimo-latest-40.iso \
 SECURE_BOOT_KEY_URL=https://github.com/ublue-os/akmods/raw/main/certs/public_key.der \
 ENROLLMENT_PASSWORD=filotimo \
 FLATPAK_REMOTE_REFS_DIR=/github/workspace/flatpaks \
-ENABLE_FLATPAK_DEPENDENCIES=false \
-WEB_UI=true # does this cause issues?
+ENABLE_FLATPAK_DEPENDENCIES=false
 sudo podman cp container-installer:/build-container-installer/filotimo-latest-40.iso ./

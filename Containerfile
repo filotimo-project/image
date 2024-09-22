@@ -92,7 +92,6 @@ RUN --mount=type=cache,dst=/var/cache/rpm-ostree \
     ostree container commit
 
 # Install Filotimo packages
-# TODO figure out grub theme
 RUN --mount=type=cache,dst=/var/cache/rpm-ostree \
     rm -rf /var/cache/rpm-ostree/repomd && \
     rpm-ostree override remove zram-generator-defaults fedora-logos desktop-backgrounds-compat plasma-lookandfeel-fedora \
@@ -101,6 +100,7 @@ RUN --mount=type=cache,dst=/var/cache/rpm-ostree \
         --install filotimo-branding \
         --install filotimo-kde-theme && \
     rpm-ostree install \
+        filotimo-grub-theme \
         filotimo-environment-firefox \
         filotimo-environment-fonts \
         filotimo-environment-ime \
@@ -111,6 +111,7 @@ RUN --mount=type=cache,dst=/var/cache/rpm-ostree \
         bup kup python-libfuse \
         filotimo-atychia \
         filotimo-plymouth-theme && \
+    sed -i 's@enabled=1@enabled=0@g' /etc/yum.repos.d/terra.repo && \
     ostree container commit
 
 # Replace ppd with tuned - remove for f41 TODO
@@ -126,7 +127,7 @@ RUN --mount=type=cache,dst=/var/cache/rpm-ostree \
 RUN --mount=type=cache,dst=/var/cache/rpm-ostree \
     rpm-ostree override remove \
         ublue-os-update-services \
-        toolbox && \
+        toolbox kcron && \
     rpm-ostree install \
         plasma-discover-rpm-ostree \
         distrobox \
@@ -176,9 +177,9 @@ RUN --mount=type=cache,dst=/var/cache/rpm-ostree \
     ostree container commit
 
 # Add modifications and finalize
-COPY build.sh /tmp/build.sh
-COPY build-initramfs.sh /tmp/build-initramfs.sh
-COPY image-info.sh /tmp/image-info.sh
+COPY scripts/build.sh /tmp/build.sh
+COPY scripts/build-initramfs.sh /tmp/build-initramfs.sh
+COPY scripts/image-info.sh /tmp/image-info.sh
 
 RUN mkdir -p /var/lib/alternatives && \
     /tmp/build.sh && \
@@ -207,17 +208,20 @@ RUN --mount=type=cache,dst=/var/cache/rpm-ostree \
     curl -Lo /etc/yum.repos.d/_copr_jhyub-supergfxctl-plasmoid.repo https://copr.fedorainfracloud.org/coprs/jhyub/supergfxctl-plasmoid/repo/fedora-"${FEDORA_MAJOR_VERSION}"/jhyub-supergfxctl-plasmoid-fedora-"${FEDORA_MAJOR_VERSION}".repo && \
     curl -Lo /tmp/nvidia-install.sh https://raw.githubusercontent.com/ublue-os/hwe/main/nvidia-install.sh && \
     chmod +x /tmp/nvidia-install.sh && \
-    IMAGE_NAME="kinoite" \
-    /tmp/nvidia-install.sh && \
+    IMAGE_NAME="kinoite" /tmp/nvidia-install.sh && \
     rpm-ostree install nvidia-vaapi-driver && \
     systemctl enable supergfxd && \
     sed -i 's@enabled=1@enabled=0@g' /etc/yum.repos.d/_copr_jhyub-supergfxctl-plasmoid.repo && \
     ostree container commit
 
-COPY build-initramfs.sh /tmp/build-initramfs.sh
-COPY image-info.sh /tmp/image-info.sh
+COPY scripts/build-initramfs.sh /tmp/build-initramfs.sh
+COPY scripts/image-info.sh /tmp/image-info.sh
+# For less ugly supergfxctl icons
+COPY scripts/integrate-supergfxctl-plasmoid.sh /tmp/integrate-supergfxctl-plasmoid.sh
+COPY scripts/supergfxctl-icons /tmp/supergfxctl-icons
 
 # Finalize
 RUN /tmp/build-initramfs.sh && \
     IMAGE_FLAVOR=nvidia /tmp/image-info.sh && \
+    cd /tmp && ./integrate-supergfxctl-plasmoid.sh && \
     ostree container commit

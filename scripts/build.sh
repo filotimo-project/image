@@ -42,6 +42,17 @@ mkdir -p /var/lib/samba/usershares
 chown -R root:usershares /var/lib/samba/usershares
 firewall-offline-cmd --service=samba --service=samba-client
 
+# Helper for virt-manager
+cat <<-EOF | tee /usr/libexec/selinux-virt-manager > /dev/null
+#!/usr/bin/bash
+set -e
+kdialog --warningcontinuecancel "The SELinux security module included with this operating system may cause compatibility issues with Virtual Machine Manager. Continuing will temporarily disable SELinux until the next reboot, or until the command\nsudo setenforce 1\nis executed in a terminal.\n" --title "Security Warning"
+pkexec setenforce 0
+virt-manager
+EOF
+chmod +x /usr/libexec/selinux-virt-manager
+sed -i 's@^Exec=.*@Exec=/usr/libexec/selinux-virt-manager@' /usr/share/applications/virt-manager.desktop
+
 # Fix GTK theming
 mkdir -p /etc/skel/.config/gtk-3.0 /etc/skel/.config/gtk-4.0
 touch /etc/skel/.config/gtk-3.0/settings.ini /etc/skel/.config/gtk-4.0/settings.ini

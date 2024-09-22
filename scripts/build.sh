@@ -76,6 +76,7 @@ gtk-theme-name=Breeze
 gtk-xft-dpi=98304" > /etc/skel/.config/gtk-4.0/settings.ini
 
 # Install OpenH264 on first boot
+sed -i 's@enabled=0@enabled=1@g' /etc/yum.repos.d/fedora-cisco-openh264.repo
 SCRIPT_FILE="/usr/libexec/postinstall-install-openh264"
 cat <<EOF | tee "$SCRIPT_FILE" > /dev/null
 #!/usr/bin/bash

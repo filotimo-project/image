@@ -56,7 +56,7 @@ jobs:
             --volume "${TEMP_FLATPAK_INSTALL_DIR}:/temp_flatpak_install_dir" \
             "${image}" /temp_flatpak_install_dir/script.sh
           docker rmi "${image}"
-          docker run --name=container-installer --replace --privileged --volume /github/workspace/:/github/workspace/ \
+          docker run --name=container-installer --privileged --volume /github/workspace/:/github/workspace/ \
             ghcr.io/jasonn3/build-container-installer:v1.2.2 \
             ARCH=x86_64 \
             IMAGE_NAME=filotimo \

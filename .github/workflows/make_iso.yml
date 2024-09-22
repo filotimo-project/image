@@ -71,6 +71,7 @@ jobs:
             ENABLE_FLATPAK_DEPENDENCIES=false
           docker cp container-installer:/build-container-installer/filotimo-latest-40.iso ./
           docker cp container-installer:/build-container-installer/filotimo-latest-40.iso-CHECKSUM ./
+          echo "iso_name=filotimo-latest-40.iso" >> $GITHUB_OUTPUT
           echo "iso_path=$(readlink -f ./filotimo-latest-40.iso)" >> $GITHUB_OUTPUT
 
         # This example is for uploading your ISO as a GitHub artifact. You can do something similar using any cloud storage, so long as you copy the output

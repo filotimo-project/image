@@ -115,3 +115,56 @@ RemainAfterExit=true
 WantedBy=multi-user.target
 EOF
 systemctl enable postinstall-install-openh264.service
+
+# Install brew
+# Convince the installer we are in CI
+touch /.dockerenv
+
+# Make these so script will work
+mkdir -p /var/home
+mkdir -p /var/roothome
+
+# Brew Install Script
+curl -Lo /tmp/brew-install https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh
+chmod +x /tmp/brew-install
+/tmp/brew-install
+tar --zstd -cvf /usr/share/homebrew.tar.zst /home/linuxbrew/.linuxbrew
+
+# Install Starship Shell Prompt
+curl -Lo /tmp/starship.tar.gz "https://github.com/starship/starship/releases/latest/download/starship-x86_64-unknown-linux-gnu.tar.gz"
+tar -xzf /tmp/starship.tar.gz -C /tmp
+install -c -m 0755 /tmp/starship /usr/bin
+# shellcheck disable=SC2016
+echo 'eval "$(starship init bash)"' >> /etc/bashrc
+echo 'eval "$(starship init zsh)"' >> /etc/zshrc
+
+# ...and also add bash preexec
+curl -Lo /usr/share/bash-prexec https://raw.githubusercontent.com/rcaloras/bash-preexec/master/bash-preexec.sh
+
+# Setup MOTD
+BOLD='\033[1m'
+LIGHT_BLUE='\033[1;34m'
+RESET='\033[0m'
+printf "${BOLD}Welcome to the filotimo terminal :)${RESET}
+
+This is a ${LIGHT_BLUE}rpm-ostree${RESET} based system, so many terminal commands may work differently to how you're used to, as the base system is immutable.
+
+A container-based workflow is recommended, since the base system is read only.
+To do things that need a read and write system, create a distrobox.
+A distrobox is a container that can have any distribution installed within it, and is integrated with your system.
+Run this to create a distrobox:
+${LIGHT_BLUE}distrobox create --image registry.fedoraproject.org/fedora-toolbox:40 --name my-distrobox${RESET}
+
+To install terminal utilities to the base system, use ${LIGHT_BLUE}brew${RESET}, which only installs into your home folder.
+
+To install graphical applications, use Flatpaks or AppImages.
+Flatpaks can be easily installed in Discover and through the terminal with the ${LIGHT_BLUE}flatpak${RESET} command, and AppImageLauncher is included with the system for easy integration.
+If strictly necessary, you can install normal Fedora .rpm packages with ${LIGHT_BLUE}rpm-ostree${RESET}, but this is not recommended.
+
+Many utility scripts are included with the system.
+To view these scripts, use the ${LIGHT_BLUE}ujust${RESET} command.
+Scripts to install a KDE development environment are included.
+
+To disable this message, type:
+${LIGHT_BLUE}ujust toggle-user-motd${RESET}\n\n" > /etc/user-motd
+

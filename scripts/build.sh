@@ -168,3 +168,5 @@ Scripts to install a KDE development environment are included.
 To disable this message, type:
 ${LIGHT_BLUE}ujust toggle-user-motd${RESET}\n\n" > /etc/user-motd
 
+# Fix X display issues in distrobox
+echo 'xhost +si:localuser:$USER >/dev/null' > /etc/skel/.distroboxrc

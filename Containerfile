@@ -176,12 +176,19 @@ RUN --mount=type=cache,dst=/var/cache/rpm-ostree \
     sed -i 's@enabled=1@enabled=0@g' /etc/yum.repos.d/_copr_rok-cdemu.repo && \
     ostree container commit
 
+# Consolidate and install justfiles
+COPY just /tmp/just
+
+RUN --mount=type=cache,dst=/var/cache/rpm-ostree \
+    find /tmp/just -iname '*.just' -exec printf "\n\n" \; -exec cat {} \; >> /usr/share/ublue-os/just/60-custom.just
+
 # Add modifications and finalize
 COPY scripts/build.sh /tmp/build.sh
 COPY scripts/build-initramfs.sh /tmp/build-initramfs.sh
 COPY scripts/image-info.sh /tmp/image-info.sh
 
-RUN mkdir -p /var/lib/alternatives && \
+RUN --mount=type=cache,dst=/var/cache/rpm-ostree \
+    mkdir -p /var/lib/alternatives && \
     /tmp/build.sh && \
     /tmp/build-initramfs.sh && \
     IMAGE_FLAVOR=main /tmp/image-info.sh && \

@@ -154,6 +154,7 @@ To do things that need a read and write system, create a distrobox.
 A distrobox is a container that can have any distribution installed within it, and is integrated with your system.
 Run this to create a distrobox:
 ${LIGHT_BLUE}distrobox create --image registry.fedoraproject.org/fedora-toolbox:40 --name my-distrobox${RESET}
+To find out more, visit ${LIGHT_BLUE}https://github.com/89luca89/distrobox${RESET}
 
 To install terminal utilities to the base system, use ${LIGHT_BLUE}brew${RESET}, which only installs into your home folder.
 

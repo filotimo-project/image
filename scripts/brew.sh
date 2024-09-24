@@ -17,3 +17,6 @@ chmod +x /tmp/brew-install
 /tmp/brew-install
 tar --zstd -cvf /usr/share/homebrew.tar.zst /home/linuxbrew/.linuxbrew
 rm -rf /usr/share/homebrew.tar.zst
+
+# Fix XDG_DATA_DIRS
+echo 'export XDG_DATA_DIRS="/home/linuxbrew/.linuxbrew/share:$XDG_DATA_DIRS"' >> /etc/profile.d/brew.sh

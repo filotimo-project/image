@@ -2,7 +2,7 @@
 setup-kde-development-environment:
     #!/usr/bin/bash
     set -e
-    printf "A rawhide distrobox will be created with the name kde-development-environment."
+    printf "A rawhide distrobox will be created with the name kde-development-environment.\n"
     printf "You will be placed in this distrobox on completion of this recipe.\n\n"
     sleep 2
     distrobox create --name kde-development-environment --init --additional-packages "systemd" --image registry.fedoraproject.org/fedora:rawhide

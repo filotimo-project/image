@@ -18,3 +18,5 @@ sed -i 's@^SHELL=.*@SHELL=/usr/bin/fishlogin@' /etc/default/useradd
 sed -i '/\/usr\/bin\/fish/d' /etc/shells
 sed -i '/\/bin\/fish/d' /etc/shells
 
+# Remove the intro message, we already have user-motd
+echo 'set -U fish_greeting ""' >> /usr/share/fish/config.fish

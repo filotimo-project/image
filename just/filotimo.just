@@ -29,6 +29,7 @@ setup-kde-development-environment:
 
 # Installs the session file to run a KDE development environment from SDDM. Requires setup-kde-development-environment
 install-kde-session:
+    #!/usr/bin/bash
     printf "This will set up an overlayfs over /usr, making it temporarily mutable until the next reboot. This recipe will need to be run again on every reboot.\n"
     sudo rpm-ostree usroverlay
     echo 'chown -f -R $USER:$USER /tmp/.X11-unix' | sudo tee /etc/profile.d/set_tmp_x11_permissions.sh > /dev/null
@@ -39,3 +40,12 @@ install-kde-session:
     $HOME/kde/usr/lib64/libexec/plasma-dbus-run-session-if-needed $HOME/kde/usr/lib64/libexec/startplasma-dev.sh -wayland" > ~/.local/bin/start-plasma-dev-session
     chmod +x ~/.local/bin/start-plasma-dev-session
     printf "Complete! Log out to see the Plasma development session in SDDM.\n"
+
+# Reinstall system flatpaks for rebasers
+reinstall-system-flatpaks:
+    #!/usr/bin/bash
+    flatpak remote-delete --system fedora || true
+    flatpak remote-delete --system fedora-testing || true
+    flatpak remote-add --system --if-not-exists flathub https://dl.flathub.org/repo/flathub.flatpakrepo || true
+    FLATPAK_LIST="$(curl https://raw.githubusercontent.com/filotimo-project/filotimo/refs/heads/main/flatpaks/flatpaks | tr '\n' ' ')"
+    flatpak --system -y install --or-update ${FLATPAK_LIST}

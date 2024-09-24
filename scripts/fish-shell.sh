@@ -14,4 +14,4 @@ chmod +x /usr/bin/fishlogin
 
 # Set fish as default shell
 echo "/usr/bin/fishlogin" >> /etc/shells
-sudo sed -i 's@^SHELL=.*@SHELL=/usr/bin/fishlogin@' /etc/default/useradd
+sed -i 's@^SHELL=.*@SHELL=/usr/bin/fishlogin@' /etc/default/useradd

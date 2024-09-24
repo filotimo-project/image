@@ -2,10 +2,11 @@
 set -ouex pipefail
 
 # Setup MOTD
+cat <<'EOF'> /usr/libexec/ublue-motd
 BOLD='\033[1m'
 LIGHT_BLUE='\033[1;34m'
 RESET='\033[0m'
-echo "${BOLD}Welcome to the filotimo terminal :)${RESET}
+echo -e "${BOLD}Welcome to the filotimo terminal :)${RESET}
 
 This is a ${LIGHT_BLUE}rpm-ostree${RESET} based system, so many terminal commands may work differently to how you're used to, as the base system is immutable.
 
@@ -31,5 +32,6 @@ ${LIGHT_BLUE}fish${RESET} is wrapped with ${LIGHT_BLUE}fishlogin${RESET}, ensuri
 
 To disable/re-enable this message, type:
 ${LIGHT_BLUE}ujust toggle-user-motd${RESET}
-----------------------------------------------------------------------------------\n" > /usr/share/user-motd
-ln -sf /usr/share/user-motd /etc/user-motd
+----------------------------------------------------------------------------------\n"
+EOF
+chmod +x /usr/libexec/ublue-motd

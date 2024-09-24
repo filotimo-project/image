@@ -28,7 +28,7 @@ setup-kde-development-environment:
     printf "Complete! Run ujust install-kde-session to install the session file to allow you to enter the Plasma development environment.\n"'
 
 # Installs the session file to run a KDE development environment from SDDM. Requires setup-kde-development-environment
-install-kde-session:
+install-kde-development-session:
     #!/usr/bin/bash
     printf "This will set up an overlayfs over /usr, making it temporarily mutable until the next reboot. This recipe will need to be run again on every reboot.\n"
     sudo rpm-ostree usroverlay

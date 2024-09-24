@@ -75,3 +75,10 @@ gtk-xft-dpi=98304" > /etc/skel/.config/gtk-4.0/settings.ini
 
 # Fix X display issues in distrobox
 echo 'xhost +si:localuser:$USER >/dev/null' > /etc/skel/.distroboxrc
+
+# Set some flatpak overrides
+mkdir -p /var/lib/flatpak/overrides
+echo '[Context]
+filesystems=~/.themes;~/.icons;' | tee /var/lib/flatpak/overrides/global > /dev/null
+echo '[Context]
+sockets=!wayland;' | tee /var/lib/flatpak/overrides/dev.vencord.Vesktop /var/lib/flatpak/overrides/com.discordapp.Discord > /dev/null

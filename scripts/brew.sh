@@ -1,7 +1,9 @@
 #!/usr/bin/bash
 set -ouex pipefail
 
-# Install brew
+# Install prereqs
+rpm-ostree install procps-ng curl file git gcc
+
 # Convince the installer we are in CI
 touch /.dockerenv
 
@@ -14,3 +16,4 @@ curl -Lo /tmp/brew-install https://raw.githubusercontent.com/Homebrew/install/HE
 chmod +x /tmp/brew-install
 /tmp/brew-install
 tar --zstd -cvf /usr/share/homebrew.tar.zst /home/linuxbrew/.linuxbrew
+rm -rf /usr/share/homebrew.tar.zst

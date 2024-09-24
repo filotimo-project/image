@@ -172,8 +172,9 @@ RUN --mount=type=cache,dst=/var/cache/rpm-ostree \
         hplip \
         htop \
         virt-manager \
-        podman \
-        fish zsh && \
+        podman docker \
+        fish zsh \
+        libreoffice && \
     sed -i 's@enabled=1@enabled=0@g' /etc/yum.repos.d/_copr_rok-cdemu.repo && \
     ostree container commit
 

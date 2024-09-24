@@ -1,5 +1,4 @@
 #!/usr/bin/bash
-
 set -oue pipefail
 
 if [[ "${KERNEL_FLAVOR}" == "surface" ]]; then

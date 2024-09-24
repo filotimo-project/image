@@ -1,5 +1,4 @@
 #!/usr/bin/bash
-
 set -oue pipefail
 
 IMAGE_PRETTY_NAME="filotimo"

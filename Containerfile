@@ -172,7 +172,8 @@ RUN --mount=type=cache,dst=/var/cache/rpm-ostree \
         hplip \
         htop \
         virt-manager \
-        podman && \
+        podman \
+        fish zsh && \
     sed -i 's@enabled=1@enabled=0@g' /etc/yum.repos.d/_copr_rok-cdemu.repo && \
     ostree container commit
 
@@ -183,15 +184,14 @@ RUN --mount=type=cache,dst=/var/cache/rpm-ostree \
     find /tmp/just -iname '*.just' -exec printf "\n\n" \; -exec cat {} \; >> /usr/share/ublue-os/just/60-custom.just
 
 # Add modifications and finalize
-COPY scripts/build.sh /tmp/build.sh
-COPY scripts/build-initramfs.sh /tmp/build-initramfs.sh
-COPY scripts/image-info.sh /tmp/image-info.sh
+COPY scripts /tmp/scripts
 
 RUN --mount=type=cache,dst=/var/cache/rpm-ostree \
     mkdir -p /var/lib/alternatives && \
-    /tmp/build.sh && \
-    /tmp/build-initramfs.sh && \
-    IMAGE_FLAVOR=main /tmp/image-info.sh && \
+    cd /tmp/scripts && \
+    ./build-base.sh && \
+    ./build-initramfs.sh && \
+    IMAGE_FLAVOR="main" ./image-info.sh && \
     ostree container commit
 
 FROM ghcr.io/ublue-os/akmods-nvidia:${KERNEL_FLAVOR}-${FEDORA_MAJOR_VERSION} AS nvidia-akmods
@@ -221,14 +221,12 @@ RUN --mount=type=cache,dst=/var/cache/rpm-ostree \
     sed -i 's@enabled=1@enabled=0@g' /etc/yum.repos.d/_copr_jhyub-supergfxctl-plasmoid.repo && \
     ostree container commit
 
-COPY scripts/build-initramfs.sh /tmp/build-initramfs.sh
-COPY scripts/image-info.sh /tmp/image-info.sh
-# For less ugly supergfxctl icons
-COPY scripts/integrate-supergfxctl-plasmoid.sh /tmp/integrate-supergfxctl-plasmoid.sh
-COPY scripts/supergfxctl-icons /tmp/supergfxctl-icons
+COPY scripts /tmp/scripts
 
 # Finalize
-RUN /tmp/build-initramfs.sh && \
-    IMAGE_FLAVOR=nvidia /tmp/image-info.sh && \
-    cd /tmp && ./integrate-supergfxctl-plasmoid.sh && \
+RUN --mount=type=cache,dst=/var/cache/rpm-ostree \
+    cd /tmp/scripts && \
+    ./build-initramfs.sh && \
+    IMAGE_FLAVOR="nvidia" ./image-info.sh && \
+    ./integrate-supergfxctl-plasmoid.sh && \
     ostree container commit

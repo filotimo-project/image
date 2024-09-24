@@ -6,4 +6,4 @@ ln -sf /usr/share/icons/breeze/status/22/battery-profile-performance.svg /usr/sh
 ln -sf /usr/share/icons/breeze/actions/22/system-shutdown.svg /usr/share/icons/breeze/status/22/supergfxctl-plasmoid-dgpu-off.svg
 
 # Copy better icons
-cp supergfxctl-icons/* /usr/share/icons/breeze/status/22/
+cp ./supergfxctl-icons/* /usr/share/icons/breeze/status/22/

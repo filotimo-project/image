@@ -84,3 +84,12 @@ echo '[Context]
 filesystems=~/.themes;~/.icons;' | tee /var/lib/flatpak/overrides/global > /dev/null
 echo '[Context]
 sockets=!wayland;' | tee /var/lib/flatpak/overrides/dev.vencord.Vesktop /var/lib/flatpak/overrides/com.discordapp.Discord > /dev/null
+
+# Work around a bug with xdg-desktop-portal crashing
+echo '[Desktop Entry]
+Type=Application
+Exec=/usr/bin/systemctl --user restart xdg-desktop-portal.service
+X-KDE-StartupNotify=false
+X-KDE-autostart-phase=2
+NoDisplay=true
+Name=Restart XDG Desktop Portal (bug workaround)' > /etc/xdg/autostart/restart-xdg-desktop-portal.desktop

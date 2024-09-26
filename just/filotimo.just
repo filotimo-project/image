@@ -8,7 +8,7 @@ setup-kde-development-environment:
     distrobox create --name kde-development-environment --init --additional-packages "systemd" --image registry.fedoraproject.org/fedora:rawhide
     podman start kde-development-environment
     podman exec -it --user "$USER" kde-development-environment bash -c '
-    sudo dnf install -y --no-gpgchecks librsvg2-devel hunspell-devel clang-tools-extra clang cmake make gdb ninja qt6-*-devel qt5-*-devel opencv-devel mpv-libs-devel openh264 "pkgconfig(libavcodec)" "pkgconfig(libavfilter)" "pkgconfig(libavformat)"
+    sudo dnf install -y --no-gpgchecks librsvg2-devel hunspell-devel clang-tools-extra clang cmake make gdb ninja git git-clang-format qt6-*-devel qt5-*-devel opencv-devel mpv-libs-devel openh264 "pkgconfig(libavcodec)" "pkgconfig(libavfilter)" "pkgconfig(libavformat)"
 
     if [[ ":$PATH:" != *":$HOME/.local/bin:"* ]]; then
         echo "export PATH=\"\$HOME/.local/bin:\$PATH\"" >> ~/.zshrc

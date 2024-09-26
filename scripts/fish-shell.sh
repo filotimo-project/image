@@ -11,12 +11,12 @@ exec fish -l "$@"' > /usr/bin/fishlogin
 chmod +x /usr/bin/fishlogin
 
 # Set fish as default shell
-echo "/usr/bin/fishlogin" >> /etc/shells
 sed -i 's@^SHELL=.*@SHELL=/usr/bin/fishlogin@' /etc/default/useradd
 
-# Remove normal fish from /etc/shells to avoid people breaking their system
+# Remove normal fish from /etc/shells to avoid people breaking their systemm - replace with fishlogin
 sed -i '/\/usr\/bin\/fish/d' /etc/shells
 sed -i '/\/bin\/fish/d' /etc/shells
+echo "/usr/bin/fishlogin" >> /etc/shells
 
 # Remove the intro message, we already have user-motd
 echo 'set -U fish_greeting ""' >> /usr/share/fish/config.fish

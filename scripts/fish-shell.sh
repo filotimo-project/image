@@ -13,7 +13,7 @@ chmod +x /usr/bin/fishlogin
 # Set fish as default shell
 sed -i 's@^SHELL=.*@SHELL=/usr/bin/fishlogin@' /etc/default/useradd
 
-# Remove normal fish from /etc/shells to avoid people breaking their systemm - replace with fishlogin
+# Remove normal fish from /etc/shells to avoid people breaking their system - replace with fishlogin
 sed -i '/\/usr\/bin\/fish/d' /etc/shells
 sed -i '/\/bin\/fish/d' /etc/shells
 echo "/usr/bin/fishlogin" >> /etc/shells

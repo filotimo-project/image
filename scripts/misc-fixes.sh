@@ -22,10 +22,6 @@ rm -rf /usr/share/icons/breeze/status/24/fcitx.svg
 rm -rf /usr/share/icons/breeze-dark/status/22/fcitx.svg
 rm -rf /usr/share/icons/breeze-dark/status/24/fcitx.svg
 
-# Fix up GRUB TODO doesn't work
-sed -i 's/GRUB_TERMINAL_OUTPUT="console"/GRUB_TERMINAL_OUTPUT="gfxterm"/' /etc/default/grub
-echo "GRUB_THEME=\"/boot/grub2/themes/filotimo/theme.txt\"" >> /etc/default/grub
-
 # Fix misconfigured samba usershares
 mkdir -p /var/lib/samba/usershares
 chown -R root:usershares /var/lib/samba/usershares

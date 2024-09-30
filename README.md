@@ -1,3 +1,5 @@
+### See https://build.opensuse.org/project/show/home:tduck:filotimolinux for our packages (not all are included in this image)
+
 # image-template
 
 # Purpose

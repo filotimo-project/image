@@ -1,10 +1,6 @@
 #!/usr/bin/bash
 set -ouex pipefail
 
-#!/bin/bash
-
-set -ouex pipefail
-
 RELEASE="$(rpm -E %fedora)"
 
 # Enable samba for filesharing

@@ -36,10 +36,10 @@ RUN --mount=type=cache,dst=/var/cache/rpm-ostree \
 
 # Install akmod rpms for various firmware and features
 # add and disable negativo immediately due to incompatibility with RPMFusion although it's required for akmods
+# https://github.com/ublue-os/bazzite/blob/main/Containerfile#L303
 RUN --mount=type=cache,dst=/var/cache/rpm-ostree \
     curl -Lo /usr/bin/copr https://raw.githubusercontent.com/ublue-os/COPR-command/main/copr && \
     chmod +x /usr/bin/copr && \
-    curl -Lo /etc/yum.repos.d/_copr_hikariknight-looking-glass-kvmfr.repo https://copr.fedorainfracloud.org/coprs/hikariknight/looking-glass-kvmfr/repo/fedora-"${FEDORA_MAJOR_VERSION}"/hikariknight-looking-glass-kvmfr-fedora-"${FEDORA_MAJOR_VERSION}".repo && \
     curl -Lo /etc/yum.repos.d/_copr_rok-cdemu.repo https://copr.fedorainfracloud.org/coprs/rok/cdemu/repo/fedora-"${FEDORA_MAJOR_VERSION}"/rok-cdemu-fedora-"${FEDORA_MAJOR_VERSION}".repo && \
     ostree container commit
 
@@ -50,7 +50,6 @@ RUN --mount=type=cache,dst=/var/cache/rpm-ostree \
     sed -i 's@enabled=0@enabled=1@g' /etc/yum.repos.d/negativo17-fedora-multimedia.repo && \
     sed -i 's@enabled=0@enabled=1@g' /etc/yum.repos.d/_copr_ublue-os-akmods.repo && \
     rpm-ostree install \
-        /tmp/akmods-rpms/kmods/*kvmfr*.rpm \
         /tmp/akmods-rpms/kmods/*xone*.rpm \
         /tmp/akmods-rpms/kmods/*openrazer*.rpm \
         /tmp/akmods-rpms/kmods/*v4l2loopback*.rpm \
@@ -66,10 +65,10 @@ RUN --mount=type=cache,dst=/var/cache/rpm-ostree \
         /tmp/akmods-extra-rpms/kmods/*evdi*.rpm && \
     sed -i 's@enabled=1@enabled=0@g' /etc/yum.repos.d/negativo17-fedora-multimedia.repo && \
     sed -i 's@enabled=1@enabled=0@g' /etc/yum.repos.d/_copr_ublue-os-akmods.repo && \
-    sed -i 's@enabled=1@enabled=0@g' /etc/yum.repos.d/_copr_hikariknight-looking-glass-kvmfr.repo && \
     ostree container commit
 
-# Some realtek firmware that I don't really know about
+# Some mediatek firmware that I don't really know about
+# https://github.com/ublue-os/bluefin/blob/main/build_files/firmware.sh
 RUN --mount=type=cache,dst=/var/cache/rpm-ostree \
     mkdir -p /tmp/mediatek-firmware && \
     curl -Lo /tmp/mediatek-firmware/WIFI_MT7922_patch_mcu_1_1_hdr.bin "https://gitlab.com/kernel-firmware/linux-firmware/-/raw/8f08053b2a7474e210b03dbc2b4ba59afbe98802/mediatek/WIFI_MT7922_patch_mcu_1_1_hdr.bin?inline=false" && \
@@ -78,6 +77,13 @@ RUN --mount=type=cache,dst=/var/cache/rpm-ostree \
     xz --check=crc32 /tmp/mediatek-firmware/WIFI_RAM_CODE_MT7922_1.bin && \
     mv -vf /tmp/mediatek-firmware/* /usr/lib/firmware/mediatek/ && \
     rm -rf /tmp/mediatek-firmware && \
+    ostree container commit
+
+# Install ublue-os udev rules
+# https://github.com/ublue-os/config/
+COPY --from=ghcr.io/ublue-os/config:latest /rpms/ublue-os-udev-rules.noarch.rpm /tmp/
+RUN --mount=type=cache,dst=/var/cache/rpm-ostree \
+    rpm -ivh /tmp/ublue-os-udev-rules.noarch.rpm && \
     ostree container commit
 
 # Install important repos
@@ -99,7 +105,6 @@ RUN --mount=type=cache,dst=/var/cache/rpm-ostree \
         --install filotimo-branding \
         --install filotimo-kde-theme && \
     rpm-ostree install \
-        filotimo-grub-theme \
         filotimo-environment-firefox \
         filotimo-environment-fonts \
         filotimo-environment-ime \
@@ -126,7 +131,7 @@ RUN --mount=type=cache,dst=/var/cache/rpm-ostree \
 RUN --mount=type=cache,dst=/var/cache/rpm-ostree \
     rpm-ostree override remove \
         ublue-os-update-services \
-        toolbox kcron && \
+        toolbox && \
     rpm-ostree install \
         plasma-discover-rpm-ostree \
         distrobox \
@@ -194,6 +199,7 @@ RUN --mount=type=cache,dst=/var/cache/rpm-ostree \
     IMAGE_FLAVOR="main" ./image-info.sh && \
     ostree container commit
 
+# Generate NVIDIA image
 FROM ghcr.io/ublue-os/akmods-nvidia:${KERNEL_FLAVOR}-${FEDORA_MAJOR_VERSION} AS nvidia-akmods
 
 FROM filotimo as filotimo-nvidia
@@ -210,6 +216,8 @@ ARG IMAGE_TAG="${IMAGE_TAG:-latest}"
 # Install NVIDIA driver, use different copr repo for kf6 supergfxctl plasmoid
 # TODO only install supergfxctl on hybrid systems or find some way to only show it on hybrid systems
 # it's confusing visual noise outside of that context
+# https://github.com/ublue-os/hwe/
+# https://github.com/ublue-os/bazzite/blob/main/Containerfile#L950
 RUN --mount=type=cache,dst=/var/cache/rpm-ostree \
     --mount=type=bind,from=nvidia-akmods,src=/rpms,dst=/tmp/akmods-rpms \
     curl -Lo /etc/yum.repos.d/_copr_jhyub-supergfxctl-plasmoid.repo https://copr.fedorainfracloud.org/coprs/jhyub/supergfxctl-plasmoid/repo/fedora-"${FEDORA_MAJOR_VERSION}"/jhyub-supergfxctl-plasmoid-fedora-"${FEDORA_MAJOR_VERSION}".repo && \

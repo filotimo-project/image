@@ -79,13 +79,6 @@ RUN --mount=type=cache,dst=/var/cache/rpm-ostree \
     rm -rf /tmp/mediatek-firmware && \
     ostree container commit
 
-# Install ublue-os udev rules
-# https://github.com/ublue-os/config/
-COPY --from=ghcr.io/ublue-os/config:latest /rpms/ublue-os-udev-rules.noarch.rpm /tmp/
-RUN --mount=type=cache,dst=/var/cache/rpm-ostree \
-    rpm -ivh /tmp/ublue-os-udev-rules.noarch.rpm && \
-    ostree container commit
-
 # Install important repos
 RUN --mount=type=cache,dst=/var/cache/rpm-ostree \
     echo "${FEDORA_MAJOR_VERSION}" && \

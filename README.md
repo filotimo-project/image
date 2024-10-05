@@ -2,6 +2,7 @@
 
 TODO: Branch for versions
 Make stable version of image, which follows the creation of a new versioned branch, like bazzite. this version should be reflected in the system.
+Reset rechunker on each feature addition number change, or major upstream version change
 something like 40.feature addition number.minor bugfix number
 
 

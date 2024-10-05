@@ -40,7 +40,16 @@ sed -i 's@^Exec=.*@Exec=/usr/libexec/selinux-virt-manager@' /usr/share/applicati
 
 # Fix GTK theming
 echo "[org/gnome/desktop/interface]
-gtk-theme='Breeze'" > /etc/dconf/db/distro.d/00-breeze-theme
+color-scheme='default'
+cursor-size=24
+cursor-theme='breeze_cursors'
+enable-animations=true
+font-name='Inter Variable,  10'
+gtk-theme='Breeze'
+icon-theme='breeze'
+scaling-factor=uint32 1
+text-scaling-factor=1.0
+toolbar-style='text'" > /etc/dconf/db/distro.d/00-breeze-theme
 
 # Fix X display issues in distrobox
 echo 'xhost +si:localuser:$USER >/dev/null' > /etc/skel/.distroboxrc

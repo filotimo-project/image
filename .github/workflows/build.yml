@@ -115,9 +115,9 @@ jobs:
       - name: Remove auxiliary images
         # We are tight on space, need at least 2x for OSTree
         run: |
-          sudo podman image rm docker://ghcr.io/ublue-os/kinoite-main:${{ env.MAJOR_VERSION }}
-          sudo podman image rm docker://ghcr.io/ublue-os/akmods:fsync-${{ env.MAJOR_VERSION }}
-          sudo podman image rm docker://ghcr.io/ublue-os/akmods-extra:fsync-${{ env.MAJOR_VERSION }}
+          sudo podman image rm ghcr.io/ublue-os/kinoite-main:${{ env.MAJOR_VERSION }}
+          sudo podman image rm ghcr.io/ublue-os/akmods:fsync-${{ env.MAJOR_VERSION }}
+          sudo podman image rm ghcr.io/ublue-os/akmods-extra:fsync-${{ env.MAJOR_VERSION }}
 
       - name: Generate tags
         id: generate-tags
@@ -184,7 +184,7 @@ jobs:
           rechunk: 'ghcr.io/hhd-dev/rechunk:v0.8.3'
           ref: 'raw-img'
           prev-ref: '${{ steps.generate-prev-ref.outputs.ref }}'
-          version: '${{ env.TIMESTAMP_TAG }}'
+          version: ${{ env.TIMESTAMP_TAG }}
           labels: |
             io.artifacthub.package.readme-url=https://raw.githubusercontent.com/${{ github.repository }}/main/README.md
             org.opencontainers.image.version=${{ steps.labels.outputs.VERSION }}

@@ -39,47 +39,18 @@ chmod +x /usr/libexec/selinux-virt-manager
 sed -i 's@^Exec=.*@Exec=/usr/libexec/selinux-virt-manager@' /usr/share/applications/virt-manager.desktop
 
 # Fix GTK theming
-mkdir -p /etc/skel/.config/gtk-3.0 /etc/skel/.config/gtk-4.0
-touch /etc/skel/.config/gtk-3.0/settings.ini /etc/skel/.config/gtk-4.0/settings.ini
-echo "[Settings]
-gtk-application-prefer-dark-theme=false
-gtk-button-images=true
-gtk-cursor-theme-name=breeze_cursors
-gtk-cursor-theme-size=24
-gtk-decoration-layout=icon:minimize,maximize,close
-gtk-enable-animations=true
-gtk-font-name=Inter Variable,  10
-gtk-icon-theme-name=breeze
-gtk-menu-images=true
-gtk-modules=colorreload-gtk-module:window-decorations-gtk-module
-gtk-primary-button-warps-slider=true
-gtk-sound-theme-name=ocean
-gtk-theme-name=Breeze
-gtk-toolbar-style=3
-gtk-xft-dpi=98304" > /etc/skel/.config/gtk-3.0/settings.ini
-echo "[Settings]
-gtk-application-prefer-dark-theme=false
-gtk-cursor-theme-name=breeze_cursors
-gtk-cursor-theme-size=24
-gtk-decoration-layout=icon:minimize,maximize,close
-gtk-enable-animations=true
-gtk-font-name=Inter Variable,  10
-gtk-icon-theme-name=breeze
-gtk-modules=colorreload-gtk-module:window-decorations-gtk-module
-gtk-primary-button-warps-slider=true
-gtk-sound-theme-name=ocean
-gtk-theme-name=Breeze
-gtk-xft-dpi=98304" > /etc/skel/.config/gtk-4.0/settings.ini
+echo "[org/gnome/desktop/interface]
+gtk-theme='Breeze'" > /etc/dconf/db/distro.d/00-breeze-theme
 
 # Fix X display issues in distrobox
 echo 'xhost +si:localuser:$USER >/dev/null' > /etc/skel/.distroboxrc
 
-# Set some flatpak overrides
-mkdir -p /var/lib/flatpak/overrides
+# Set some flatpak overrides - fixes fcitx, some launching bug, and theming
+mkdir -p /etc/skel/.local/share/flatpak/overrides
 echo '[Context]
-filesystems=~/.themes;~/.icons;' | tee /var/lib/flatpak/overrides/global > /dev/null
+filesystems=~/.themes;~/.icons;' | tee /etc/skel/.local/share/flatpak/overrides/global > /dev/null
 echo '[Context]
-sockets=!wayland;' | tee /var/lib/flatpak/overrides/dev.vencord.Vesktop /var/lib/flatpak/overrides/com.discordapp.Discord > /dev/null
+sockets=!wayland;' | tee /etc/skel/.local/share/flatpak/overrides/dev.vencord.Vesktop /etc/skel/.local/share/flatpak/overrides/com.discordapp.Discord > /dev/null
 
 # Work around a bug with xdg-desktop-portal crashing
 echo '[Desktop Entry]

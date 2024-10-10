@@ -50,6 +50,7 @@ icon-theme='breeze'
 scaling-factor=uint32 1
 text-scaling-factor=1.0
 toolbar-style='text'" > /etc/dconf/db/distro.d/00-breeze-theme
+dconf update
 
 # Fix X display issues in distrobox
 echo 'xhost +si:localuser:$USER >/dev/null' > /etc/skel/.distroboxrc

@@ -223,7 +223,6 @@ RUN --mount=type=cache,dst=/var/cache/rpm-ostree \
     rpm-ostree install nvidia-vaapi-driver && \
     systemctl enable supergfxd && \
     sed -i 's@enabled=1@enabled=0@g' /etc/yum.repos.d/_copr_jhyub-supergfxctl-plasmoid.repo && \
-    sed -i 's@enabled=1@enabled=0@g' /etc/yum.repos.d/negativo17-fedora-multimedia.repo && \
     ostree container commit
 
 COPY scripts /tmp/scripts

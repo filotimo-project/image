@@ -39,8 +39,7 @@ RUN --mount=type=cache,dst=/var/cache/rpm-ostree \
     ostree container commit
 
 # Install akmod rpms for various firmware and features
-# add and disable negativo immediately due to incompatibility with RPMFusion although it's required for akmods
-# https://github.com/ublue-os/bazzite/blob/main/Containerfile#L303
+# https://github.com/ublue-os/bazzite/blob/main/Containerfile#L309
 RUN --mount=type=cache,dst=/var/cache/rpm-ostree \
     curl -Lo /usr/bin/copr https://raw.githubusercontent.com/ublue-os/COPR-command/main/copr && \
     chmod +x /usr/bin/copr && \
@@ -50,9 +49,10 @@ RUN --mount=type=cache,dst=/var/cache/rpm-ostree \
 RUN --mount=type=cache,dst=/var/cache/rpm-ostree \
     --mount=type=bind,from=akmods,src=/rpms,dst=/tmp/akmods-rpms \
     --mount=type=bind,from=akmods-extra,src=/rpms,dst=/tmp/akmods-extra-rpms \
-    curl -Lo /etc/yum.repos.d/negativo17-fedora-multimedia.repo https://negativo17.org/repos/fedora-multimedia.repo && \
-    sed -i 's@enabled=0@enabled=1@g' /etc/yum.repos.d/negativo17-fedora-multimedia.repo && \
     sed -i 's@enabled=0@enabled=1@g' /etc/yum.repos.d/_copr_ublue-os-akmods.repo && \
+    rpm-ostree install \
+        https://mirrors.rpmfusion.org/free/fedora/rpmfusion-free-release-$(rpm -E %fedora).noarch.rpm \
+        https://mirrors.rpmfusion.org/nonfree/fedora/rpmfusion-nonfree-release-$(rpm -E %fedora).noarch.rpm && \
     rpm-ostree install \
         /tmp/akmods-rpms/kmods/*xone*.rpm \
         /tmp/akmods-rpms/kmods/*openrazer*.rpm \
@@ -67,8 +67,10 @@ RUN --mount=type=cache,dst=/var/cache/rpm-ostree \
         /tmp/akmods-extra-rpms/kmods/*bmi260*.rpm \
         /tmp/akmods-extra-rpms/kmods/*ryzen-smu*.rpm \
         /tmp/akmods-extra-rpms/kmods/*evdi*.rpm && \
-    sed -i 's@enabled=1@enabled=0@g' /etc/yum.repos.d/negativo17-fedora-multimedia.repo && \
     sed -i 's@enabled=1@enabled=0@g' /etc/yum.repos.d/_copr_ublue-os-akmods.repo && \
+    rpm-ostree override remove \
+        rpmfusion-free-release \
+        rpmfusion-nonfree-release && \
     ostree container commit
 
 # Some mediatek firmware that I don't really know about
@@ -90,7 +92,6 @@ RUN --mount=type=cache,dst=/var/cache/rpm-ostree \
     curl -Lo /etc/yum.repos.d/klassy.repo https://download.opensuse.org/repositories/home:/paul4us/Fedora_"${FEDORA_MAJOR_VERSION}"/home:paul4us.repo && \
     curl -Lo /etc/yum.repos.d/_copr_rodoma92-kde-cdemu-manager.repo https://copr.fedorainfracloud.org/coprs/rodoma92/kde-cdemu-manager/repo/fedora-"${FEDORA_MAJOR_VERSION}"/rodoma92-kde-cdemu-manager-fedora-"${FEDORA_MAJOR_VERSION}".repo && \
     curl -Lo /etc/yum.repos.d/terra.repo https://terra.fyralabs.com/terra.repo && \
-    rpm-ostree install rpmfusion-free-release-tainted rpmfusion-nonfree-release-tainted && \
     ostree container commit
 
 # Install Filotimo packages
@@ -125,6 +126,7 @@ RUN --mount=type=cache,dst=/var/cache/rpm-ostree \
 
 # Install misc. packages
 # libdvdcss has dubious legality
+# TODO remove pulseaudio-utils for f41 - upstreamed into kinfocenter package
 RUN --mount=type=cache,dst=/var/cache/rpm-ostree \
     rpm-ostree override remove \
         ublue-os-update-services \
@@ -142,21 +144,14 @@ RUN --mount=type=cache,dst=/var/cache/rpm-ostree \
         setroubleshoot \
         openssl openssl-libs \
         python3-pip \
-        nmap \
         i2c-tools \
-        dmidecode \
         pulseaudio-utils \
         p7zip \
-        p7zip-plugins \
         unzip \
         unrar \
-        libheif libheif-tools \
-        gstreamer1-plugins-bad-free-extras gstreamer1-plugins-bad-freeworld gstreamer1-plugins-ugly gstreamer1-vaapi \
+        gstreamer1-plugins-good gstreamer1-plugin-vaapi gstreamer1-plugin-libav \
         x265 \
         ffmpeg \
-        mesa-vdpau-drivers-freeworld mesa-va-drivers-freeworld \
-        intel-media-driver libva-intel-driver libva-utils vdpauinfo \
-        libdvdcss vlc \
         kde-cdemu-manager-kf6 \
         v4l2loopback pipewire-v4l2 libcamera-v4l2 \
         samba samba-usershares samba-dcerpc samba-ldb-ldap-modules samba-winbind-clients samba-winbind-modules \
@@ -169,15 +164,14 @@ RUN --mount=type=cache,dst=/var/cache/rpm-ostree \
         foomatic \
         foomatic-db-ppds \
         gutenprint \
-        libimobiledevice \
         hplip \
+        libimobiledevice \
+        android-tools \
         htop \
         virt-manager \
         podman docker \
         fish zsh \
         libreoffice && \
-    sed -i 's@enabled=1@enabled=0@g' /etc/yum.repos.d/_copr_rok-cdemu.repo && \
-    sed -i 's@enabled=1@enabled=0@g' /etc/yum.repos.d/rpmfusion-*.repo && \
     ostree container commit
 
 # Consolidate and install justfiles
